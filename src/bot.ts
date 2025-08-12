@@ -171,14 +171,46 @@ bot.on('message:text', async (ctx) => {
 
 // Handle email input
 async function handleEmailInput(ctx: BotContext, email: string) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Comprehensive email validation
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
   
-  if (!emailRegex.test(email)) {
-    await ctx.reply('❌ Please enter a valid email address:');
+  // Check if email is too long
+  if (email.length > 254) {
+    await ctx.reply('❌ Email address is too long. Please enter a valid email address:');
     return;
   }
 
-  ctx.session.email = email;
+  // Check if email is too short
+  if (email.length < 5) {
+    await ctx.reply('❌ Email address is too short. Please enter a valid email address:');
+    return;
+  }
+
+  // Check email format
+  if (!emailRegex.test(email)) {
+    await ctx.reply('❌ Please enter a valid email address (e.g., user@example.com):');
+    return;
+  }
+
+  // Check for common typos in domains
+  const commonDomainTypos = {
+    'gmail.com': ['gmai.com', 'gmial.com', 'gmail.co', 'gmaill.com'],
+    'yahoo.com': ['yaho.com', 'yahoo.co', 'yahooo.com'],
+    'hotmail.com': ['hotmai.com', 'hotmail.co', 'hotmial.com'],
+    'outlook.com': ['outlook.co', 'outlok.com']
+  };
+
+  const domain = email.split('@')[1]?.toLowerCase();
+  for (const [correctDomain, typos] of Object.entries(commonDomainTypos)) {
+    if (typos.includes(domain)) {
+      await ctx.reply(`❌ Did you mean *${email.replace(domain, correctDomain)}*? Please enter the correct email address:`, {
+        parse_mode: 'Markdown'
+      });
+      return;
+    }
+  }
+
+  ctx.session.email = email.toLowerCase().trim();
   ctx.session.step = 'entering_name';
   
   await ctx.reply('👤 Please enter your full name:', {
@@ -192,12 +224,53 @@ async function handleEmailInput(ctx: BotContext, email: string) {
 
 // Handle name input
 async function handleNameInput(ctx: BotContext, name: string) {
-  if (name.length < 2) {
+  const trimmedName = name.trim();
+  
+  // Check minimum length
+  if (trimmedName.length < 2) {
     await ctx.reply('❌ Please enter a valid name (at least 2 characters):');
     return;
   }
 
-  ctx.session.name = name;
+  // Check maximum length
+  if (trimmedName.length > 100) {
+    await ctx.reply('❌ Name is too long. Please enter a name with less than 100 characters:');
+    return;
+  }
+
+  // Check for valid characters (letters, spaces, hyphens, apostrophes)
+  const nameRegex = /^[a-zA-ZÀ-ÿĀ-žА-я\s\-'\.]+$/;
+  if (!nameRegex.test(trimmedName)) {
+    await ctx.reply('❌ Please enter a valid name using only letters, spaces, hyphens, and apostrophes:');
+    return;
+  }
+
+  // Check for minimum number of parts (at least first name)
+  const nameParts = trimmedName.split(/\s+/).filter(part => part.length > 0);
+  if (nameParts.length < 1) {
+    await ctx.reply('❌ Please enter at least your first name:');
+    return;
+  }
+
+  // Check that each part has reasonable length
+  const hasValidParts = nameParts.every(part => part.length >= 1 && part.length <= 50);
+  if (!hasValidParts) {
+    await ctx.reply('❌ Please enter a valid name (each part should be 1-50 characters):');
+    return;
+  }
+
+  // Check for suspicious patterns (repeated characters, etc.)
+  if (/(.)\1{4,}/.test(trimmedName)) {
+    await ctx.reply('❌ Please enter a real name:');
+    return;
+  }
+
+  // Capitalize properly
+  const capitalizedName = nameParts
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+
+  ctx.session.name = capitalizedName;
   ctx.session.step = 'entering_position';
   
   await ctx.reply('💼 Please enter your work position:', {
@@ -211,12 +284,47 @@ async function handleNameInput(ctx: BotContext, name: string) {
 
 // Handle work position input
 async function handlePositionInput(ctx: BotContext, position: string) {
-  if (position.length < 2) {
+  const trimmedPosition = position.trim();
+  
+  // Check minimum length
+  if (trimmedPosition.length < 2) {
     await ctx.reply('❌ Please enter a valid work position (at least 2 characters):');
     return;
   }
 
-  ctx.session.workPosition = position;
+  // Check maximum length
+  if (trimmedPosition.length > 100) {
+    await ctx.reply('❌ Work position is too long. Please enter a position with less than 100 characters:');
+    return;
+  }
+
+  // Check for valid characters (letters, numbers, spaces, common punctuation)
+  const positionRegex = /^[a-zA-ZÀ-ÿĀ-žА-я0-9\s\-\.\,\&\/\(\)]+$/;
+  if (!positionRegex.test(trimmedPosition)) {
+    await ctx.reply('❌ Please enter a valid work position using letters, numbers, and common punctuation:');
+    return;
+  }
+
+  // Check for suspicious patterns (too many repeated characters)
+  if (/(.)\1{4,}/.test(trimmedPosition)) {
+    await ctx.reply('❌ Please enter a real work position:');
+    return;
+  }
+
+  // Check that it's not just numbers or special characters
+  if (!/[a-zA-ZÀ-ÿĀ-žА-я]/.test(trimmedPosition)) {
+    await ctx.reply('❌ Please enter a valid work position that contains letters:');
+    return;
+  }
+
+  // Capitalize first letter of each word
+  const capitalizedPosition = trimmedPosition
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+  ctx.session.workPosition = capitalizedPosition;
   ctx.session.step = 'completed';
   
   // Save data to Google Sheets

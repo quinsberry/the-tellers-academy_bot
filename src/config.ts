@@ -6,14 +6,10 @@ export const config = {
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN!,
   },
-  supabase: {
-    url: process.env.SUPABASE_URL!,
-    anonKey: process.env.SUPABASE_ANON_KEY!,
-  },
-  stripe: {
-    secretKey: process.env.STRIPE_SECRET_KEY!,
-    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY!,
-    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+  googleSheets: {
+    spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID!,
+    serviceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
+    privateKey: process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
   },
   app: {
     nodeEnv: process.env.NODE_ENV || 'development',
@@ -24,9 +20,9 @@ export const config = {
 // Validate required environment variables
 const requiredEnvVars = [
   'TELEGRAM_BOT_TOKEN',
-  'SUPABASE_URL',
-  'SUPABASE_ANON_KEY',
-  'STRIPE_SECRET_KEY',
+  'GOOGLE_SPREADSHEET_ID',
+  'GOOGLE_SERVICE_ACCOUNT_EMAIL',
+  'GOOGLE_PRIVATE_KEY',
 ];
 
 for (const envVar of requiredEnvVars) {

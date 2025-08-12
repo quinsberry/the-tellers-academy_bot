@@ -2,7 +2,7 @@
   "courses": [
     {
       "id": 1,
-      "name": "The Tellers Agency",
+      "name": "How to pretend to be a smart woman",
       "short_description": "The Tellers Agency is a platform for creating and selling courses.",
       "description": "The Tellers Agency is a platform for creating and selling courses. Verry good course",
       "authors": [
@@ -16,11 +16,11 @@
       "start_date": "2025-09-01",
       "end_date": "2025-09-30",
       "image": "https://via.placeholder.com/150",
-      "link": "https://thetellersagency.com"
+      "payment_link": "https://thetellersagency.com"
     },
     {
         "id": 2,
-        "name": "The Tellers Agency",
+        "name": "How to find a rich man",
         "short_description": "The Tellers Agency is a platform for creating and selling courses.",
         "description": "The Tellers Agency is a platform for creating and selling courses. Verry good course",
         "authors": [
@@ -38,7 +38,7 @@
         "start_date": "2025-09-01",
         "end_date": "2025-09-30",
         "image": "https://via.placeholder.com/150",
-        "link": "https://thetellersagency.com"
+        "payment_link": "https://thetellersagency.com"
     }
   ]
 }

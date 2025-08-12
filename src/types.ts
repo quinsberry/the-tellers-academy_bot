@@ -1,8 +1,9 @@
 export interface UserSession {
-  step: 'start' | 'selecting_course' | 'entering_contact' | 'payment';
-  selectedCourseId?: string;
-  contact?: string;
-  orderId?: string;
+  step: 'start' | 'course_detail' | 'entering_email' | 'entering_name' | 'entering_position' | 'completed';
+  selectedCourseId?: number;
+  email?: string;
+  name?: string;
+  workPosition?: string;
 }
 
 export interface BotContext {

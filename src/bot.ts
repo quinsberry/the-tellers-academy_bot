@@ -1,7 +1,8 @@
 import { Bot, Context, session, SessionFlavor } from 'grammy';
 import { config } from './config';
 import { UserSession } from './types';
-import { Database, Course } from './database';
+import { CoursesService, Course } from '@/services/CoursesService';
+import { SheetsService, UserData } from '@/services/SheetsService';
 
 // Extend the context with session data
 type BotContext = Context & SessionFlavor<UserSession>;
@@ -15,70 +16,61 @@ function initial(): UserSession {
 
 bot.use(session({ initial }));
 
-// Start command
+// Start command - show welcome message and course list
 bot.command('start', async (ctx) => {
-  ctx.session.step = 'start';
-  
-  await ctx.reply(
-    '🎓 Welcome to Course Bot!\n\n' +
-    'I can help you browse and purchase our available courses.\n\n' +
-    'Use /courses to see all available courses or /help for more information.'
-  );
+  await showWelcomeAndCourses(ctx);
 });
 
 // Help command
 bot.command('help', async (ctx) => {
   await ctx.reply(
-    '📚 Course Bot Help\n\n' +
-    '• /start - Start the bot\n' +
-    '• /courses - Browse available courses\n' +
+    '📚 Tellers Agency Academy Help\n\n' +
+    '• /start - Start the bot and see course list\n' +
     '• /help - Show this help message\n\n' +
-    'Simply follow the prompts to select a course, provide your contact information, and complete your purchase!'
+    'Simply select a course to view details and purchase!'
   );
 });
 
-// Courses command
-bot.command('courses', async (ctx) => {
+// Function to show welcome message and course list
+async function showWelcomeAndCourses(ctx: BotContext) {
+  ctx.session.step = 'start';
+  
   try {
-    const courses = await Database.getCourses();
+    const courses = CoursesService.getAllCourses();
     
     if (courses.length === 0) {
       await ctx.reply('Sorry, no courses are currently available. Please check back later!');
       return;
     }
 
-    ctx.session.step = 'selecting_course';
-    
-    let message = '📚 Available Courses:\n\n';
+    let message = '🎓 Welcome to the Tellers Agency Academy\n\n';
+    message += '📚 Available Courses:\n\n';
     
     const keyboard = courses.map((course) => {
-      const price = (course.price / 100).toFixed(2);
       message += `📖 ${course.name}\n`;
-      if (course.description) {
-        message += `   ${course.description}\n`;
-      }
-      message += `   💰 $${price} ${course.currency.toUpperCase()}\n\n`;
+      message += `   ${course.short_description}\n`;
+      message += `   📅 Starts: ${CoursesService.formatDate(course.start_date)}\n\n`;
       
-      return [{ text: `Select: ${course.name}`, callback_data: `select_course_${course.id}` }];
+      return [{ text: course.name, callback_data: `course_${course.id}` }];
     });
 
-    await ctx.reply(message + 'Choose a course to purchase:', {
+    await ctx.reply(message + 'Select a course to view details:', {
       reply_markup: {
         inline_keyboard: keyboard
       }
     });
   } catch (error) {
-    console.error('Error fetching courses:', error);
+    console.error('Error loading courses:', error);
     await ctx.reply('Sorry, there was an error loading the courses. Please try again later.');
   }
-});
+}
 
-// Course selection callback
-bot.callbackQuery(/^select_course_(.+)$/, async (ctx) => {
-  const courseId = ctx.match[1];
+// Course detail view
+bot.callbackQuery(/^course_(\d+)$/, async (ctx) => {
+  const courseId = parseInt(ctx.match[1]);
   
   try {
-    const course = await Database.getCourse(courseId);
+    const course = CoursesService.getCourseById(courseId);
     
     if (!course) {
       await ctx.answerCallbackQuery('Course not found');
@@ -86,86 +78,174 @@ bot.callbackQuery(/^select_course_(.+)$/, async (ctx) => {
     }
 
     ctx.session.selectedCourseId = courseId;
-    ctx.session.step = 'entering_contact';
+    ctx.session.step = 'course_detail';
 
-    const price = (course.price / 100).toFixed(2);
+    const message = formatCourseDetails(course);
     
-    await ctx.editMessageText(
-      `✅ You selected: ${course.name}\n` +
-      `💰 Price: $${price} ${course.currency.toUpperCase()}\n\n` +
-      `📞 Please provide your contact information (email or phone number) to proceed with the purchase:`
-    );
+    await ctx.editMessageText(message, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '💳 Buy the course', callback_data: 'buy_course' }],
+          [{ text: '← Back to courses', callback_data: 'back_to_courses' }]
+        ]
+      }
+    });
     
     await ctx.answerCallbackQuery();
   } catch (error) {
-    console.error('Error selecting course:', error);
-    await ctx.answerCallbackQuery('Error selecting course');
-    await ctx.reply('Sorry, there was an error. Please try again.');
+    console.error('Error showing course details:', error);
+    await ctx.answerCallbackQuery('Error loading course details');
   }
 });
 
-// Handle contact information
-bot.on('message:text', async (ctx) => {
-  if (ctx.session.step === 'entering_contact') {
-    const contact = ctx.message.text.trim();
-    
-    // Basic validation for email or phone
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    
-    if (!emailRegex.test(contact) && !phoneRegex.test(contact)) {
-      await ctx.reply('Please provide a valid email address or phone number.');
-      return;
-    }
+// Format course details message
+function formatCourseDetails(course: Course): string {
+  return `📖 ${course.name}\n\n` +
+         `📝 ${course.description}\n\n` +
+         `👥 Authors: ${CoursesService.formatAuthors(course.authors)}\n\n` +
+         `📅 Start Date: ${CoursesService.formatDate(course.start_date)}\n` +
+         `📅 End Date: ${CoursesService.formatDate(course.end_date)}\n\n` +
+         `💰 Price: ${course.price} ${course.currency}`;
+}
 
-    ctx.session.contact = contact;
-    ctx.session.step = 'payment';
-
-    try {
-      const course = await Database.getCourse(ctx.session.selectedCourseId!);
-      
-      if (!course) {
-        await ctx.reply('Course not found. Please start over with /courses');
-        return;
-      }
-
-      const price = (course.price / 100).toFixed(2);
-      
-      await ctx.reply(
-        `📋 Order Summary:\n\n` +
-        `📖 Course: ${course.name}\n` +
-        `📞 Contact: ${contact}\n` +
-        `💰 Total: $${price} ${course.currency.toUpperCase()}\n\n` +
-        `Click the button below to proceed with payment:`,
-        {
-          reply_markup: {
-            inline_keyboard: [[
-              { text: `💳 Pay $${price}`, callback_data: 'proceed_payment' }
-            ]]
-          }
-        }
-      );
-    } catch (error) {
-      console.error('Error preparing payment:', error);
-      await ctx.reply('Sorry, there was an error. Please try again.');
-    }
-  }
-});
-
-// Payment callback (placeholder for now)
-bot.callbackQuery('proceed_payment', async (ctx) => {
+// Back to courses
+bot.callbackQuery('back_to_courses', async (ctx) => {
   await ctx.answerCallbackQuery();
+  await showWelcomeAndCourses(ctx);
+});
+
+// Buy course - start data collection
+bot.callbackQuery('buy_course', async (ctx) => {
+  ctx.session.step = 'entering_email';
+  
   await ctx.editMessageText(
-    '🚧 Payment integration coming soon!\n\n' +
-    'Your order has been recorded and we will contact you shortly to complete the payment.\n\n' +
-    'Use /courses to browse more courses or /start to begin again.'
+    '📧 Please enter your email address:',
+    {
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '← Back to course', callback_data: `course_${ctx.session.selectedCourseId}` }
+        ]]
+      }
+    }
   );
   
-  // Reset session
-  ctx.session.step = 'start';
-  delete ctx.session.selectedCourseId;
-  delete ctx.session.contact;
+  await ctx.answerCallbackQuery();
 });
+
+// Handle text messages based on current step
+bot.on('message:text', async (ctx) => {
+  const text = ctx.message.text.trim();
+  
+  switch (ctx.session.step) {
+    case 'entering_email':
+      await handleEmailInput(ctx, text);
+      break;
+    case 'entering_name':
+      await handleNameInput(ctx, text);
+      break;
+    case 'entering_position':
+      await handlePositionInput(ctx, text);
+      break;
+    default:
+      await ctx.reply('Please use /start to begin or select an option from the menu.');
+  }
+});
+
+// Handle email input
+async function handleEmailInput(ctx: BotContext, email: string) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (!emailRegex.test(email)) {
+    await ctx.reply('❌ Please enter a valid email address:');
+    return;
+  }
+
+  ctx.session.email = email;
+  ctx.session.step = 'entering_name';
+  
+  await ctx.reply('👤 Please enter your full name:', {
+    reply_markup: {
+      inline_keyboard: [[
+        { text: '← Back to course', callback_data: `course_${ctx.session.selectedCourseId}` }
+      ]]
+    }
+  });
+}
+
+// Handle name input
+async function handleNameInput(ctx: BotContext, name: string) {
+  if (name.length < 2) {
+    await ctx.reply('❌ Please enter a valid name (at least 2 characters):');
+    return;
+  }
+
+  ctx.session.name = name;
+  ctx.session.step = 'entering_position';
+  
+  await ctx.reply('💼 Please enter your work position:', {
+    reply_markup: {
+      inline_keyboard: [[
+        { text: '← Back to course', callback_data: `course_${ctx.session.selectedCourseId}` }
+      ]]
+    }
+  });
+}
+
+// Handle work position input
+async function handlePositionInput(ctx: BotContext, position: string) {
+  if (position.length < 2) {
+    await ctx.reply('❌ Please enter a valid work position (at least 2 characters):');
+    return;
+  }
+
+  ctx.session.workPosition = position;
+  ctx.session.step = 'completed';
+  
+  // Save data to Google Sheets
+  try {
+    const course = CoursesService.getCourseById(ctx.session.selectedCourseId!);
+    if (!course) {
+      throw new Error('Course not found');
+    }
+
+    const userData: UserData = {
+      telegramUsername: ctx.from?.username || `${ctx.from?.first_name} ${ctx.from?.last_name}` || 'Unknown',
+      email: ctx.session.email!,
+      name: ctx.session.name!,
+      workPosition: ctx.session.workPosition!,
+      courseId: course.id,
+      courseName: course.name,
+      timestamp: new Date().toISOString()
+    };
+
+    await SheetsService.saveUserData(userData);
+
+    // Show success message with payment link
+    await ctx.reply(
+      '✅ Your information has been saved successfully!\n\n' +
+      '💳 Follow the link to pay and save the receipt. You will need to confirm your purchase:\n\n' +
+      `${course.payment_link}\n\n` +
+      'Thank you for choosing Tellers Agency Academy!',
+      {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '🏠 Back to courses', callback_data: 'back_to_courses' }
+          ]]
+        }
+      }
+    );
+
+    // Reset session
+    ctx.session = { step: 'start' };
+
+  } catch (error) {
+    console.error('Error saving user data:', error);
+    await ctx.reply(
+      '❌ Sorry, there was an error saving your information. Please try again later.\n\n' +
+      'Use /start to return to the course list.'
+    );
+  }
+}
 
 // Error handler
 bot.catch((err) => {

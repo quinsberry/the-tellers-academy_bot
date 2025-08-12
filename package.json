@@ -13,10 +13,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@supabase/supabase-js": "^2.55.0",
     "dotenv": "^17.2.1",
-    "grammy": "^1.37.0",
-    "stripe": "^18.4.0"
+    "google-auth-library": "^10.2.1",
+    "google-spreadsheet": "^5.0.2",
+    "grammy": "^1.37.0"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",

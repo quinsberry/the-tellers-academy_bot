@@ -1,5 +1,5 @@
 {
-  "name": "tg-course-bot",
+  "name": "the-tellers-agency-courses-bot",
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {

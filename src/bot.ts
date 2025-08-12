@@ -32,14 +32,19 @@ bot.command('help', async (ctx) => {
 });
 
 // Function to show welcome message and course list
-async function showWelcomeAndCourses(ctx: BotContext) {
+async function showWelcomeAndCourses(ctx: BotContext, edit = false) {
   ctx.session.step = 'start';
   
   try {
     const courses = CoursesService.getAllCourses();
     
     if (courses.length === 0) {
-      await ctx.reply('Sorry, no courses are currently available. Please check back later!');
+      const errorMsg = 'Sorry, no courses are currently available. Please check back later!';
+      if (edit) {
+        await ctx.editMessageText(errorMsg);
+      } else {
+        await ctx.reply(errorMsg);
+      }
       return;
     }
 
@@ -54,14 +59,26 @@ async function showWelcomeAndCourses(ctx: BotContext) {
       return [{ text: course.name, callback_data: `course_${course.id}` }];
     });
 
-    await ctx.reply(message + 'Select a course to view details:', {
+    const finalMessage = message + 'Select a course to view details:';
+    const replyMarkup = {
       reply_markup: {
         inline_keyboard: keyboard
       }
-    });
+    };
+
+    if (edit) {
+      await ctx.editMessageText(finalMessage, replyMarkup);
+    } else {
+      await ctx.reply(finalMessage, replyMarkup);
+    }
   } catch (error) {
     console.error('Error loading courses:', error);
-    await ctx.reply('Sorry, there was an error loading the courses. Please try again later.');
+    const errorMsg = 'Sorry, there was an error loading the courses. Please try again later.';
+    if (edit) {
+      await ctx.editMessageText(errorMsg);
+    } else {
+      await ctx.reply(errorMsg);
+    }
   }
 }
 
@@ -111,7 +128,7 @@ function formatCourseDetails(course: Course): string {
 // Back to courses
 bot.callbackQuery('back_to_courses', async (ctx) => {
   await ctx.answerCallbackQuery();
-  await showWelcomeAndCourses(ctx);
+  await showWelcomeAndCourses(ctx, true); // Pass true to edit the message
 });
 
 // Buy course - start data collection

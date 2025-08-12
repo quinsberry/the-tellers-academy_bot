@@ -1,4 +1,4 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { config } from '../config';
 import { JWT } from 'google-auth-library';
 
@@ -15,6 +15,11 @@ export interface UserData {
 export class SheetsService {
     private static doc: GoogleSpreadsheet | null = null;
 
+    static getSheet(doc: GoogleSpreadsheet): GoogleSpreadsheetWorksheet | null {
+        const spreadSheetTitle = 'List of The Tellers Agency Academy course applicants';
+        return doc.sheetsByTitle[spreadSheetTitle] || null;
+    }
+
     static async initializeSheet(): Promise<GoogleSpreadsheet> {
         if (!this.doc) {
             const jwt = new JWT({
@@ -27,7 +32,7 @@ export class SheetsService {
             await this.doc.loadInfo();
 
             // Ensure we have a sheet for user data
-            let sheet = this.doc.sheetsByTitle['List of The Tellers Agency Academy course applicants'];
+            let sheet = this.getSheet(this.doc);
             if (!sheet) {
                 sheet = await this.doc.addSheet({
                     title: 'List of The Tellers Agency Academy course applicants',
@@ -50,8 +55,10 @@ export class SheetsService {
     static async saveUserData(userData: UserData): Promise<void> {
         try {
             const doc = await this.initializeSheet();
-            const sheet = doc.sheetsByTitle['Users'];
-
+            const sheet = this.getSheet(doc);
+            if (!sheet) {
+                throw new Error('Sheet not found');
+            }
             await sheet.addRow({
                 Timestamp: userData.timestamp,
                 'Telegram Username': userData.telegramUsername,

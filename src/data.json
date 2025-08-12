@@ -3,8 +3,8 @@
     {
       "id": 1,
       "name": "How to pretend to be a smart woman",
-      "short_description": "The Tellers Agency is a platform for creating and selling courses.",
-      "description": "The Tellers Agency is a platform for creating and selling courses. Verry good course",
+      "short_description": "This course will teach you how to pretend to be a smart woman",
+      "description": "This course will teach you how to pretend to be a smart woman. Very long description",
       "authors": [
         {
           "name": "John Doe",
@@ -21,8 +21,8 @@
     {
         "id": 2,
         "name": "How to find a rich man",
-        "short_description": "The Tellers Agency is a platform for creating and selling courses.",
-        "description": "The Tellers Agency is a platform for creating and selling courses. Verry good course",
+        "short_description": "This course will teach you how to find a rich man",
+        "description": "This course will teach you how to find a rich man. Very long description",
         "authors": [
           {
             "name": "John Doe",

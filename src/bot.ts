@@ -48,18 +48,19 @@ async function showWelcomeAndCourses(ctx: BotContext, edit = false) {
       return;
     }
 
-    let message = '🎓 Welcome to the Tellers Agency Academy\n\n';
-    message += '📚 Available Courses:\n\n';
+    let message = '🎓 *Welcome to the Tellers Agency Academy*\n\n';
+    message += '📚 *Available Courses:*\n\n';
     
-    const keyboard = courses.map((course) => {
-      message += `📖 ${course.name}\n`;
-      message += `   ${course.short_description}\n`;
-      message += `   📅 Starts: ${CoursesService.formatDate(course.start_date)}\n\n`;
+    const keyboard = courses.map((course, index) => {
+      message += `*${course.name}*\n`;
+      message += `${course.short_description}\n\n`;
+      message += `   📅 Starts: *${CoursesService.formatDate(course.start_date)}*\n`;
+      message += `   💰 ${course.price} ${course.currency}\n\n`;
       
-      return [{ text: course.name, callback_data: `course_${course.id}` }];
+      return [{ text: `${course.name}`, callback_data: `course_${course.id}` }];
     });
 
-    const finalMessage = message + 'Select a course to view details:';
+    const finalMessage = message + '👇 *Select a course to view details:*';
     const replyMarkup = {
       reply_markup: {
         inline_keyboard: keyboard
@@ -67,9 +68,9 @@ async function showWelcomeAndCourses(ctx: BotContext, edit = false) {
     };
 
     if (edit) {
-      await ctx.editMessageText(finalMessage, replyMarkup);
+      await ctx.editMessageText(finalMessage, { ...replyMarkup, parse_mode: 'Markdown' });
     } else {
-      await ctx.reply(finalMessage, replyMarkup);
+      await ctx.reply(finalMessage, { ...replyMarkup, parse_mode: 'Markdown' });
     }
   } catch (error) {
     console.error('Error loading courses:', error);

@@ -1,6 +1,7 @@
 import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { config } from '../config';
 import { JWT } from 'google-auth-library';
+import { formatTimestamp } from '@/utils/formatDates';
 
 export interface UserData {
     telegramUsername: string;
@@ -11,6 +12,16 @@ export interface UserData {
     courseName: string;
     timestamp: string;
 }
+
+const HEADER_TITLES = {
+    appliedAt: 'Applied At',
+    telegramUsername: 'tg @username',
+    email: 'Email',
+    name: 'Name',
+    workPosition: 'Work Position',
+    courseId: 'Course Id',
+    courseName: 'Course Name',
+};
 
 export class SheetsService {
     private doc: GoogleSpreadsheet;
@@ -36,13 +47,13 @@ export class SheetsService {
                 sheet = await this.doc.addSheet({
                     title: config.googleSheets.spreadsheeTabName,
                     headerValues: [
-                        'Applied At',
-                        'Telegram Username',
-                        'Email',
-                        'Name',
-                        'Work Position',
-                        'Course ID',
-                        'Course Name',
+                        HEADER_TITLES.appliedAt,
+                        HEADER_TITLES.telegramUsername,
+                        HEADER_TITLES.email,
+                        HEADER_TITLES.name,
+                        HEADER_TITLES.workPosition,
+                        HEADER_TITLES.courseId,
+                        HEADER_TITLES.courseName,
                     ],
                 });
             }
@@ -55,14 +66,15 @@ export class SheetsService {
             if (!sheet) {
                 throw new Error('Sheet not found');
             }
+            console.log('userData: ', userData);
             await sheet.addRow({
-                Timestamp: userData.timestamp,
-                'Telegram Username': userData.telegramUsername,
-                Email: userData.email,
-                Name: userData.name,
-                'Work Position': userData.workPosition,
-                'Course ID': userData.courseId,
-                'Course Name': userData.courseName,
+                [HEADER_TITLES.appliedAt]: formatTimestamp(userData.timestamp),
+                [HEADER_TITLES.telegramUsername]: userData.telegramUsername,
+                [HEADER_TITLES.email]: userData.email,
+                [HEADER_TITLES.name]: userData.name,
+                [HEADER_TITLES.workPosition]: userData.workPosition,
+                [HEADER_TITLES.courseId]: userData.courseId,
+                [HEADER_TITLES.courseName]: userData.courseName,
             });
 
             console.log(`User data saved to Google Sheets successfully: ${userData.telegramUsername}`);

@@ -1,5 +1,5 @@
 import { type Course } from '@/services/CoursesService';
-import { formatCourseDate } from '@/utils/format';
+import { formatCourseDate } from '@/utils/formatDates';
 
 export const BUY_COURSE_KEY = 'buy_course';
 export const BACK_TO_COURSES_KEY = 'back_to_courses';

@@ -10,6 +10,7 @@ import {
 import { coursesService } from '@/services/CoursesService';
 import { sheetsService, UserData } from '@/services/SheetsService';
 import { config } from '@/config';
+import { getCurrentTimestamp } from '../utils/formatDates';
 
 /**
  * Handle email input with validation
@@ -89,7 +90,7 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
             workPosition: ctx.session.workPosition!,
             courseId: course.id,
             courseName: course.name,
-            timestamp: new Date().toISOString(),
+            timestamp: getCurrentTimestamp(),
         };
 
         await sheetsService.saveUserData(userData);
@@ -102,6 +103,9 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
             reply_markup: {
                 inline_keyboard: keyboard,
             },
+            link_preview_options: {
+                is_disabled: true,
+            }
         });
 
         // Reset session
@@ -155,7 +159,7 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
             workPosition: ctx.session.workPosition,
             courseId: course.id,
             courseName: course.name,
-            timestamp: new Date().toISOString(),
+            timestamp: getCurrentTimestamp(),
         };
 
         await sheetsService.saveUserData(userData);
@@ -168,6 +172,9 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
             reply_markup: {
                 inline_keyboard: keyboard,
             },
+            link_preview_options: {
+                is_disabled: true,
+            }
         });
 
         // Reset session

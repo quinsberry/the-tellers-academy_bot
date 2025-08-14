@@ -1,6 +1,7 @@
 import { Bot, session } from 'grammy';
 import { config } from './config';
 import { BotContext, UserSession } from './types';
+import { logError } from './utils/logger';
 import { handleStart, handleHelp } from './handlers/commandHandlers';
 import { handleCourseSelection, handleBackToCourses, handleBuyCourse } from './handlers/courseHandlers';
 import { handleTextMessage, handleRetrySaveData } from './handlers/inputHandlers';
@@ -35,7 +36,10 @@ bot.on('message:text', handleTextMessage);
 
 // Error handler
 bot.catch((err) => {
-  console.error('Bot error:', err);
+  logError('❌ Bot error', err.error as Error, {
+    userId: err.ctx?.from?.id,
+    username: err.ctx?.from?.username,
+  });
 });
 
 export { bot };

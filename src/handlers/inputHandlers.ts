@@ -1,5 +1,6 @@
 import { BotContext } from '../types';
 import { validateEmail, validateName, validateWorkPosition } from '../utils/validators';
+import { logError, logWarn } from '../utils/logger';
 import {
     generateBackToCourseKeyboard,
     generateSuccessMessage,
@@ -111,7 +112,11 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
         // Reset session
         ctx.session = { step: 'start' };
     } catch (error) {
-        console.error('Error saving user data:', error);
+        logError('Error saving user data', error as Error, {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+            courseId: ctx.session.selectedCourseId,
+        });
         await ctx.reply(
             '❌ Sorry, there was an error saving your information to our system.\n\n' +
                 "Don't worry, your data is still here! You can try again.",
@@ -136,7 +141,10 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
         try {
             await ctx.answerCallbackQuery();
         } catch (error) {
-            console.log('⚠️ Callback query already expired, continuing...');
+            logWarn('Callback query already expired, continuing', {
+                userId: ctx.from?.id,
+                username: ctx.from?.username,
+            });
         }
         await ctx.editMessageText('❌ Session data is incomplete. Please start over.', {
             reply_markup: {
@@ -149,7 +157,10 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
     try {
         await ctx.answerCallbackQuery();
     } catch (error) {
-        console.log('⚠️ Callback query already expired, continuing...');
+        logWarn('Callback query already expired, continuing', {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+        });
     }
     await ctx.editMessageText('🔄 Retrying to save your information...');
 
@@ -188,7 +199,11 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
         // Reset session
         ctx.session = { step: 'start' };
     } catch (error) {
-        console.error('Error saving user data on retry:', error);
+        logError('Error saving user data on retry', error as Error, {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+            courseId: ctx.session.selectedCourseId,
+        });
         await ctx.editMessageText(
             '❌ Still having trouble saving your information.\n\n' +
                 'This might be a temporary issue with our system. Please try again in a few minutes.',

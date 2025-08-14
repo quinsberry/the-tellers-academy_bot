@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { logInfo, logError } from '../utils/logger';
 
 export interface Author {
     name: string;
@@ -28,7 +29,6 @@ export class CoursesService {
     private coursesData: CoursesData | null = null;
 
     async init(): Promise<void> {
-        console.log('🔍 Initializing Courses...');
         this.coursesData = this.loadCourses();
         console.log('✅ Courses initialized');
     }
@@ -51,7 +51,7 @@ export class CoursesService {
             const coursesFile = fs.readFileSync(coursesPath, 'utf-8');
             return JSON.parse(coursesFile);
         } catch (error) {
-            console.error('❌ Failed to load courses:', error);
+            logError('Failed to load courses', error as Error);
             throw error;
         }
     }

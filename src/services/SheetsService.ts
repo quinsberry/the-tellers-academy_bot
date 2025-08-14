@@ -2,6 +2,7 @@ import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadshee
 import { config } from '../config';
 import { JWT } from 'google-auth-library';
 import { formatTimestamp } from '@/utils/formatDates';
+import { logInfo, logError } from '@/utils/logger';
 
 export interface UserData {
     telegramUsername: string;
@@ -31,8 +32,6 @@ export class SheetsService {
         
         try {
             console.log('🔍 Initializing Google Sheets connection...');
-            console.log('📊 Spreadsheet ID:', config.googleSheets.spreadsheetId);
-            console.log('📋 Sheet name:', config.googleSheets.spreadsheeTabName);
 
             const jwt = new JWT({
                 email: config.googleSheets.serviceAccountEmail,
@@ -42,12 +41,10 @@ export class SheetsService {
             this.doc = new GoogleSpreadsheet(config.googleSheets.spreadsheetId, jwt);
 
             await this.doc.loadInfo();
-            console.log('✅ Spreadsheet loaded:', this.doc.title);
 
             // Ensure we have a sheet for user data
             let sheet = this.doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
             if (!sheet) {
-                console.log(`📝 Creating sheet "${config.googleSheets.spreadsheeTabName}"...`);
                 sheet = await this.doc.addSheet({
                     title: config.googleSheets.spreadsheeTabName,
                     headerValues: [
@@ -60,10 +57,12 @@ export class SheetsService {
                         HEADER_TITLES.courseName,
                     ],
                 });
-                console.log('✅ Sheet created successfully');
             } else {
-                console.log(`✅ Sheet "${config.googleSheets.spreadsheeTabName}" found`);
             }
+            console.log('✅ Google Sheets initialized');
+            console.log('📊 Spreadsheet ID:', config.googleSheets.spreadsheetId);
+            console.log('📋 Sheet name:', config.googleSheets.spreadsheeTabName);
+            console.log('✅ Spreadsheet loaded:', this.doc.title);
         } catch (error) {
             console.error('❌ Failed to initialize Google Sheets:', error);
             throw error;
@@ -85,7 +84,11 @@ export class SheetsService {
                 );
             }
 
-            console.log('💾 Saving user data:', userData.telegramUsername);
+            logInfo('Saving user data', { 
+                username: userData.telegramUsername,
+                courseId: userData.courseId,
+                courseName: userData.courseName 
+            });
 
             await sheet.addRow({
                 [HEADER_TITLES.appliedAt]: formatTimestamp(userData.timestamp),
@@ -97,9 +100,9 @@ export class SheetsService {
                 [HEADER_TITLES.courseName]: userData.courseName,
             });
 
-            console.log(`✅ User data saved successfully: ${userData.telegramUsername}`);
+            logInfo('User data saved successfully', { username: userData.telegramUsername });
         } catch (error) {
-            console.error('❌ Error saving user data to Google Sheets:', error);
+            logError('Error saving user data to Google Sheets', error as Error);
             throw error;
         }
     }

@@ -2,6 +2,7 @@ import { bot } from './bot';
 import { config } from './config';
 import { coursesService } from './services/CoursesService';
 import { sheetsService } from './services/SheetsService';
+import { logInfo, logError } from './utils/logger';
 
 async function main() {
     console.log('🤖 Starting Telegram Course Bot...\n');
@@ -16,26 +17,25 @@ async function main() {
         await bot.start();
         console.log(`🎉 Bot started successfully in ${config.app.nodeEnv} mode`);
     } catch (error) {
-        console.error('❌ Failed to start application:', error);
-        console.error('\n💡 Fix the issues above and try again.');
+        logError('Failed to start application', error as Error);
         process.exit(1);
     }
 }
 
 // Handle graceful shutdown
 process.once('SIGINT', () => {
-    console.log('\n🛑 Received SIGINT, shutting down gracefully...');
+    logInfo('Received SIGINT, shutting down gracefully');
     bot.stop();
     process.exit(0);
 });
 
 process.once('SIGTERM', () => {
-    console.log('\n🛑 Received SIGTERM, shutting down gracefully...');
+    logInfo('Received SIGTERM, shutting down gracefully');
     bot.stop();
     process.exit(0);
 });
 
 main().catch((error) => {
-    console.error('❌ Unhandled error:', error);
+    logError('Unhandled error', error as Error);
     process.exit(1);
 });

@@ -1,5 +1,6 @@
 import { BotContext } from '../types';
 import { coursesService } from '@/services/CoursesService';
+import { logError, logWarn } from '../utils/logger';
 import {
     generateWelcomeMessage,
     generateCourseKeyboard,
@@ -42,7 +43,7 @@ export async function showWelcomeAndCourses(ctx: BotContext, edit = false): Prom
             await ctx.reply(message, { ...replyMarkup, parse_mode: 'Markdown' });
         }
     } catch (error) {
-        console.error('Error loading courses:', error);
+        logError('Error loading courses', error as Error);
         const errorMsg = 'Sorry, there was an error loading the courses. Please try again later.';
         if (edit) {
             await ctx.editMessageText(errorMsg);
@@ -79,14 +80,24 @@ export async function handleCourseSelection(ctx: BotContext, courseId: number): 
         try {
             await ctx.answerCallbackQuery();
         } catch (error) {
-            console.log('⚠️ Callback query already expired, continuing...');
+            logWarn('Callback query already expired, continuing', {
+                userId: ctx.from?.id,
+                username: ctx.from?.username,
+            });
         }
     } catch (error) {
-        console.error('Error showing course details:', error);
+        logError('Error showing course details', error as Error, {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+            courseId,
+        });
         try {
             await ctx.answerCallbackQuery('Error loading course details');
         } catch (callbackError) {
-            console.log('⚠️ Callback query already expired, continuing...');
+            logWarn('Callback query already expired, continuing', {
+                userId: ctx.from?.id,
+                username: ctx.from?.username,
+            });
         }
     }
 }

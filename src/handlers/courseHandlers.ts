@@ -76,10 +76,18 @@ export async function handleCourseSelection(ctx: BotContext, courseId: number): 
             },
         });
 
-        await ctx.answerCallbackQuery();
+        try {
+            await ctx.answerCallbackQuery();
+        } catch (error) {
+            console.log('⚠️ Callback query already expired, continuing...');
+        }
     } catch (error) {
         console.error('Error showing course details:', error);
-        await ctx.answerCallbackQuery('Error loading course details');
+        try {
+            await ctx.answerCallbackQuery('Error loading course details');
+        } catch (callbackError) {
+            console.log('⚠️ Callback query already expired, continuing...');
+        }
     }
 }
 
@@ -87,7 +95,11 @@ export async function handleCourseSelection(ctx: BotContext, courseId: number): 
  * Handle back to courses action
  */
 export async function handleBackToCourses(ctx: BotContext): Promise<void> {
-    await ctx.answerCallbackQuery();
+    try {
+        await ctx.answerCallbackQuery();
+    } catch (error) {
+        console.log('⚠️ Callback query already expired, continuing...');
+    }
     await showWelcomeAndCourses(ctx, true);
 }
 
@@ -105,5 +117,9 @@ export async function handleBuyCourse(ctx: BotContext): Promise<void> {
         },
     });
 
-    await ctx.answerCallbackQuery();
+    try {
+        await ctx.answerCallbackQuery();
+    } catch (error) {
+        console.log('⚠️ Callback query already expired, continuing...');
+    }
 }

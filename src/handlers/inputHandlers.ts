@@ -133,7 +133,11 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
 export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
     // Check if we have all the required data in the session
     if (!ctx.session.selectedCourseId || !ctx.session.email || !ctx.session.name || !ctx.session.workPosition) {
-        await ctx.answerCallbackQuery();
+        try {
+            await ctx.answerCallbackQuery();
+        } catch (error) {
+            console.log('⚠️ Callback query already expired, continuing...');
+        }
         await ctx.editMessageText('❌ Session data is incomplete. Please start over.', {
             reply_markup: {
                 inline_keyboard: [[{ text: '🏠 Back to courses', callback_data: BACK_TO_COURSES_KEY }]],
@@ -142,7 +146,11 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
         return;
     }
 
-    await ctx.answerCallbackQuery();
+    try {
+        await ctx.answerCallbackQuery();
+    } catch (error) {
+        console.log('⚠️ Callback query already expired, continuing...');
+    }
     await ctx.editMessageText('🔄 Retrying to save your information...');
 
     // Retry the save operation

@@ -13,17 +13,21 @@ export interface UserData {
 }
 
 export class SheetsService {
-    private static doc: GoogleSpreadsheet | null = null;
+    private doc: GoogleSpreadsheet;
 
-    static async initializeSheet(): Promise<GoogleSpreadsheet> {
-        if (!this.doc) {
-            const jwt = new JWT({
-                email: config.googleSheets.serviceAccountEmail,
-                key: config.googleSheets.privateKey,
-                scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-            });
-            this.doc = new GoogleSpreadsheet(config.googleSheets.spreadsheetId, jwt);
+    constructor() {
+        const jwt = new JWT({
+            email: config.googleSheets.serviceAccountEmail,
+            key: config.googleSheets.privateKey,
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        });
+        this.doc = new GoogleSpreadsheet(config.googleSheets.spreadsheetId, jwt);
 
+        this.init();
+    }
+
+    async init() {
+        if (this.doc) {
             await this.doc.loadInfo();
 
             // Ensure we have a sheet for user data
@@ -43,14 +47,11 @@ export class SheetsService {
                 });
             }
         }
-
-        return this.doc;
     }
 
-    static async saveUserData(userData: UserData): Promise<void> {
+    async saveUserData(userData: UserData): Promise<void> {
         try {
-            const doc = await this.initializeSheet();
-            const sheet = doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
+            const sheet = this.doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
             if (!sheet) {
                 throw new Error('Sheet not found');
             }
@@ -64,10 +65,12 @@ export class SheetsService {
                 'Course Name': userData.courseName,
             });
 
-            console.log('User data saved to Google Sheets successfully');
+            console.log(`User data saved to Google Sheets successfully: ${userData.telegramUsername}`);
         } catch (error) {
             console.error('Error saving user data to Google Sheets:', error);
             throw error;
         }
     }
 }
+
+export const sheetsService = new SheetsService();

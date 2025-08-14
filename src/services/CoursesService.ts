@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { logInfo, logError } from '../utils/logger';
+import { handleSystemError } from '../utils/errorHandler';
 
 export interface Author {
     name: string;
@@ -29,8 +29,15 @@ export class CoursesService {
     private coursesData: CoursesData | null = null;
 
     async init(): Promise<void> {
-        this.coursesData = this.loadCourses();
-        console.log('✅ Courses initialized');
+        try {
+            this.coursesData = this.loadCourses();
+            console.log('✅ Courses initialized');
+        } catch (error) {
+            handleSystemError(error as Error, {
+                operation: 'courses_initialization',
+            });
+            throw error;
+        }
     }
 
     getAllCourses(): Course[] {
@@ -51,7 +58,10 @@ export class CoursesService {
             const coursesFile = fs.readFileSync(coursesPath, 'utf-8');
             return JSON.parse(coursesFile);
         } catch (error) {
-            logError('Failed to load courses', error as Error);
+            handleSystemError(error as Error, {
+                operation: 'load_courses_file',
+                coursesPath: path.join(__dirname, '..', 'data.json'),
+            });
             throw error;
         }
     }

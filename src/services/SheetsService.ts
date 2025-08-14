@@ -1,8 +1,9 @@
-import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
+import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { config } from '../config';
 import { JWT } from 'google-auth-library';
 import { formatTimestamp } from '@/utils/formatDates';
 import { logInfo, logError } from '@/utils/logger';
+import { withRetry, handleSystemError } from '@/utils/errorHandler';
 
 export interface UserData {
     telegramUsername: string;
@@ -29,7 +30,7 @@ export class SheetsService {
 
     async init(): Promise<void> {
         if (this.doc) return;
-        
+
         try {
             console.log('🔍 Initializing Google Sheets connection...');
 
@@ -40,23 +41,32 @@ export class SheetsService {
             });
             this.doc = new GoogleSpreadsheet(config.googleSheets.spreadsheetId, jwt);
 
-            await this.doc.loadInfo();
+            if (!this.doc) {
+                throw new Error('Failed to initialize Google Sheets connection');
+            }
+
+            await withRetry(() => this.doc!.loadInfo(), 3, 2000);
 
             // Ensure we have a sheet for user data
             let sheet = this.doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
             if (!sheet) {
-                sheet = await this.doc.addSheet({
-                    title: config.googleSheets.spreadsheeTabName,
-                    headerValues: [
-                        HEADER_TITLES.appliedAt,
-                        HEADER_TITLES.telegramUsername,
-                        HEADER_TITLES.email,
-                        HEADER_TITLES.name,
-                        HEADER_TITLES.workPosition,
-                        HEADER_TITLES.courseId,
-                        HEADER_TITLES.courseName,
-                    ],
-                });
+                sheet = await withRetry(
+                    () =>
+                        this.doc!.addSheet({
+                            title: config.googleSheets.spreadsheeTabName,
+                            headerValues: [
+                                HEADER_TITLES.appliedAt,
+                                HEADER_TITLES.telegramUsername,
+                                HEADER_TITLES.email,
+                                HEADER_TITLES.name,
+                                HEADER_TITLES.workPosition,
+                                HEADER_TITLES.courseId,
+                                HEADER_TITLES.courseName,
+                            ],
+                        }),
+                    2,
+                    1000,
+                );
             } else {
             }
             console.log('✅ Google Sheets initialized');
@@ -64,7 +74,10 @@ export class SheetsService {
             console.log('📋 Sheet name:', config.googleSheets.spreadsheeTabName);
             console.log('✅ Spreadsheet loaded:', this.doc.title);
         } catch (error) {
-            console.error('❌ Failed to initialize Google Sheets:', error);
+            handleSystemError(error as Error, {
+                operation: 'sheets_initialization',
+                spreadsheetId: config.googleSheets.spreadsheetId,
+            });
             throw error;
         }
     }
@@ -84,21 +97,26 @@ export class SheetsService {
                 );
             }
 
-            logInfo('Saving user data', { 
+            logInfo('Saving user data', {
                 username: userData.telegramUsername,
                 courseId: userData.courseId,
-                courseName: userData.courseName 
+                courseName: userData.courseName,
             });
 
-            await sheet.addRow({
-                [HEADER_TITLES.appliedAt]: formatTimestamp(userData.timestamp),
-                [HEADER_TITLES.telegramUsername]: userData.telegramUsername,
-                [HEADER_TITLES.email]: userData.email,
-                [HEADER_TITLES.name]: userData.name,
-                [HEADER_TITLES.workPosition]: userData.workPosition,
-                [HEADER_TITLES.courseId]: userData.courseId,
-                [HEADER_TITLES.courseName]: userData.courseName,
-            });
+            await withRetry(
+                () =>
+                    sheet.addRow({
+                        [HEADER_TITLES.appliedAt]: formatTimestamp(userData.timestamp),
+                        [HEADER_TITLES.telegramUsername]: userData.telegramUsername,
+                        [HEADER_TITLES.email]: userData.email,
+                        [HEADER_TITLES.name]: userData.name,
+                        [HEADER_TITLES.workPosition]: userData.workPosition,
+                        [HEADER_TITLES.courseId]: userData.courseId,
+                        [HEADER_TITLES.courseName]: userData.courseName,
+                    }),
+                3,
+                1000,
+            );
 
             logInfo('User data saved successfully', { username: userData.telegramUsername });
         } catch (error) {

@@ -1,6 +1,7 @@
 import { BotContext } from '../types';
 import { coursesService } from '@/services/CoursesService';
 import { logError, logWarn } from '../utils/logger';
+import { handleUserError } from '../utils/errorHandler';
 import {
     generateWelcomeMessage,
     generateCourseKeyboard,
@@ -43,13 +44,16 @@ export async function showWelcomeAndCourses(ctx: BotContext, edit = false): Prom
             await ctx.reply(message, { ...replyMarkup, parse_mode: 'Markdown' });
         }
     } catch (error) {
-        logError('Error loading courses', error as Error);
-        const errorMsg = 'Sorry, there was an error loading the courses. Please try again later.';
-        if (edit) {
-            await ctx.editMessageText(errorMsg);
-        } else {
-            await ctx.reply(errorMsg);
-        }
+        await handleUserError(
+            ctx,
+            error as Error,
+            'Sorry, there was an error loading the courses. Please try again later.',
+            {
+                userId: ctx.from?.id,
+                username: ctx.from?.username,
+                operation: 'load_courses',
+            },
+        );
     }
 }
 
@@ -91,14 +95,17 @@ export async function handleCourseSelection(ctx: BotContext, courseId: number): 
             username: ctx.from?.username,
             courseId,
         });
-        try {
-            await ctx.answerCallbackQuery('Error loading course details');
-        } catch (callbackError) {
-            logWarn('Callback query already expired, continuing', {
+        await handleUserError(
+            ctx,
+            error as Error,
+            'Sorry, there was an error loading the course details. Please try again.',
+            {
                 userId: ctx.from?.id,
                 username: ctx.from?.username,
-            });
-        }
+                courseId,
+                operation: 'load_course_details',
+            },
+        );
     }
 }
 

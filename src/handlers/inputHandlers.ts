@@ -1,6 +1,7 @@
 import { BotContext } from '../types';
 import { validateEmail, validateName, validateWorkPosition } from '../utils/validators';
-import { logError, logWarn } from '../utils/logger';
+import { logWarn } from '../utils/logger';
+import { handleUserError, withRetry } from '../utils/errorHandler';
 import {
     generateBackToCourseKeyboard,
     generateSuccessMessage,
@@ -10,7 +11,6 @@ import {
 } from '../messages/courseMessages';
 import { coursesService } from '@/services/CoursesService';
 import { sheetsService, UserData } from '@/services/SheetsService';
-import { config } from '@/config';
 import { getCurrentTimestamp } from '../utils/formatDates';
 
 /**
@@ -94,7 +94,7 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
             timestamp: getCurrentTimestamp(),
         };
 
-        await sheetsService.saveUserData(userData);
+        await withRetry(() => sheetsService.saveUserData(userData), 2, 1000);
 
         // Show success message with payment link
         const successMessage = generateSuccessMessage(course.payment_link);
@@ -106,27 +106,22 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
             },
             link_preview_options: {
                 is_disabled: true,
-            }
+            },
         });
 
         // Reset session
         ctx.session = { step: 'start' };
     } catch (error) {
-        logError('Error saving user data', error as Error, {
-            userId: ctx.from?.id,
-            username: ctx.from?.username,
-            courseId: ctx.session.selectedCourseId,
-        });
-        await ctx.reply(
+        await handleUserError(
+            ctx,
+            error as Error,
             '❌ Sorry, there was an error saving your information to our system.\n\n' +
                 "Don't worry, your data is still here! You can try again.",
             {
-                reply_markup: {
-                    inline_keyboard: [
-                        [{ text: '🔄 Try Again', callback_data: RETRY_SAVE_DATA_KEY }],
-                        [{ text: '🏠 Back to courses', callback_data: BACK_TO_COURSES_KEY }],
-                    ],
-                },
+                userId: ctx.from?.id,
+                username: ctx.from?.username,
+                courseId: ctx.session.selectedCourseId,
+                operation: 'save_user_data',
             },
         );
     }
@@ -181,7 +176,7 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
             timestamp: getCurrentTimestamp(),
         };
 
-        await sheetsService.saveUserData(userData);
+        await withRetry(() => sheetsService.saveUserData(userData), 2, 1000);
 
         // Show success message with payment link
         const successMessage = generateSuccessMessage(course.payment_link);
@@ -193,30 +188,22 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
             },
             link_preview_options: {
                 is_disabled: true,
-            }
+            },
         });
 
         // Reset session
         ctx.session = { step: 'start' };
     } catch (error) {
-        logError('Error saving user data on retry', error as Error, {
-            userId: ctx.from?.id,
-            username: ctx.from?.username,
-            courseId: ctx.session.selectedCourseId,
-        });
-        await ctx.editMessageText(
+        await handleUserError(
+            ctx,
+            error as Error,
             '❌ Still having trouble saving your information.\n\n' +
                 'This might be a temporary issue with our system. Please try again in a few minutes.',
             {
-                reply_markup: {
-                    inline_keyboard: [
-                        [{ text: '🔄 Try Again', callback_data: RETRY_SAVE_DATA_KEY }],
-                        [{ text: '🏠 Back to courses', callback_data: BACK_TO_COURSES_KEY }],
-                        ...(config.telegram.supportUrl
-                            ? [[{ text: '📞 Contact Support', url: config.telegram.supportUrl }]]
-                            : []),
-                    ],
-                },
+                userId: ctx.from?.id,
+                username: ctx.from?.username,
+                courseId: ctx.session.selectedCourseId,
+                operation: 'retry_save_user_data',
             },
         );
     }

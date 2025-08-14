@@ -4,9 +4,12 @@ import {
     generateBackToCourseKeyboard,
     generateSuccessMessage,
     generateFinalKeyboard,
+    RETRY_SAVE_DATA_KEY,
+    BACK_TO_COURSES_KEY,
 } from '../messages/courseMessages';
 import { coursesService } from '@/services/CoursesService';
 import { sheetsService, UserData } from '@/services/SheetsService';
+import { config } from '@/config';
 
 /**
  * Handle email input with validation
@@ -106,8 +109,85 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
     } catch (error) {
         console.error('Error saving user data:', error);
         await ctx.reply(
-            '❌ Sorry, there was an error saving your information. Please try again later.\n\n' +
-                'Use /start to return to the course list.',
+            '❌ Sorry, there was an error saving your information to our system.\n\n' +
+                "Don't worry, your data is still here! You can try again.",
+            {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '🔄 Try Again', callback_data: RETRY_SAVE_DATA_KEY }],
+                        [{ text: '🏠 Back to courses', callback_data: BACK_TO_COURSES_KEY }],
+                    ],
+                },
+            },
+        );
+    }
+}
+
+/**
+ * Handle retry save data action
+ */
+export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
+    // Check if we have all the required data in the session
+    if (!ctx.session.selectedCourseId || !ctx.session.email || !ctx.session.name || !ctx.session.workPosition) {
+        await ctx.answerCallbackQuery();
+        await ctx.editMessageText('❌ Session data is incomplete. Please start over.', {
+            reply_markup: {
+                inline_keyboard: [[{ text: '🏠 Back to courses', callback_data: BACK_TO_COURSES_KEY }]],
+            },
+        });
+        return;
+    }
+
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageText('🔄 Retrying to save your information...');
+
+    // Retry the save operation
+    try {
+        const course = coursesService.getCourseById(ctx.session.selectedCourseId);
+        if (!course) {
+            throw new Error('Course not found');
+        }
+
+        const userData: UserData = {
+            telegramUsername: ctx.from?.username || `${ctx.from?.first_name} ${ctx.from?.last_name}` || 'Unknown',
+            email: ctx.session.email,
+            name: ctx.session.name,
+            workPosition: ctx.session.workPosition,
+            courseId: course.id,
+            courseName: course.name,
+            timestamp: new Date().toISOString(),
+        };
+
+        await sheetsService.saveUserData(userData);
+
+        // Show success message with payment link
+        const successMessage = generateSuccessMessage(course.payment_link);
+        const keyboard = generateFinalKeyboard();
+
+        await ctx.editMessageText(successMessage, {
+            reply_markup: {
+                inline_keyboard: keyboard,
+            },
+        });
+
+        // Reset session
+        ctx.session = { step: 'start' };
+    } catch (error) {
+        console.error('Error saving user data on retry:', error);
+        await ctx.editMessageText(
+            '❌ Still having trouble saving your information.\n\n' +
+                'This might be a temporary issue with our system. Please try again in a few minutes.',
+            {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '🔄 Try Again', callback_data: RETRY_SAVE_DATA_KEY }],
+                        [{ text: '🏠 Back to courses', callback_data: BACK_TO_COURSES_KEY }],
+                        ...(config.telegram.supportUrl
+                            ? [[{ text: '📞 Contact Support', url: config.telegram.supportUrl }]]
+                            : []),
+                    ],
+                },
+            },
         );
     }
 }

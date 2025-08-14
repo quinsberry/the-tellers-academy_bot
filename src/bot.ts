@@ -3,8 +3,8 @@ import { config } from './config';
 import { BotContext, UserSession } from './types';
 import { handleStart, handleHelp } from './handlers/commandHandlers';
 import { handleCourseSelection, handleBackToCourses, handleBuyCourse } from './handlers/courseHandlers';
-import { handleTextMessage } from './handlers/inputHandlers';
-import { BUY_COURSE_KEY, BACK_TO_COURSES_KEY } from './messages/courseMessages';
+import { handleTextMessage, handleRetrySaveData } from './handlers/inputHandlers';
+import { BUY_COURSE_KEY, BACK_TO_COURSES_KEY, RETRY_SAVE_DATA_KEY } from './messages/courseMessages';
 
 // Create bot instance
 const bot = new Bot<BotContext>(config.telegram.botToken);
@@ -28,6 +28,7 @@ bot.callbackQuery(/^course_(\d+)$/, async (ctx) => {
 
 bot.callbackQuery(BACK_TO_COURSES_KEY, handleBackToCourses);
 bot.callbackQuery(BUY_COURSE_KEY, handleBuyCourse);
+bot.callbackQuery(RETRY_SAVE_DATA_KEY, handleRetrySaveData);
 
 // Text message handlers
 bot.on('message:text', handleTextMessage);

@@ -5,6 +5,7 @@ dotenv.config();
 export const config = {
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN!,
+    supportUrl: process.env.TELEGRAM_SUPPORT_URL || null,
   },
   googleSheets: {
     spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID!,

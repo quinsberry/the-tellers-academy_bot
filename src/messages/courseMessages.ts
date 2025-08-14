@@ -3,6 +3,7 @@ import { formatCourseDate } from '@/utils/format';
 
 export const BUY_COURSE_KEY = 'buy_course';
 export const BACK_TO_COURSES_KEY = 'back_to_courses';
+export const RETRY_SAVE_DATA_KEY = 'retry_save_data';
 
 /**
  * Generate welcome message with course list

@@ -8,6 +8,7 @@ export const config = {
   },
   googleSheets: {
     spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID!,
+    spreadsheeTabName: process.env.GOOGLE_SPREADSHEET_TAB_NAME!,
     serviceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
     privateKey: process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
   },
@@ -21,6 +22,7 @@ export const config = {
 const requiredEnvVars = [
   'TELEGRAM_BOT_TOKEN',
   'GOOGLE_SPREADSHEET_ID',
+  'GOOGLE_SPREADSHEET_TAB_NAME',
   'GOOGLE_SERVICE_ACCOUNT_EMAIL',
   'GOOGLE_PRIVATE_KEY',
 ];

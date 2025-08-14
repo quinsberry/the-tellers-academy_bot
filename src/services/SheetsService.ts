@@ -15,11 +15,6 @@ export interface UserData {
 export class SheetsService {
     private static doc: GoogleSpreadsheet | null = null;
 
-    static getSheet(doc: GoogleSpreadsheet): GoogleSpreadsheetWorksheet | null {
-        const spreadSheetTitle = 'List of The Tellers Agency Academy course applicants';
-        return doc.sheetsByTitle[spreadSheetTitle] || null;
-    }
-
     static async initializeSheet(): Promise<GoogleSpreadsheet> {
         if (!this.doc) {
             const jwt = new JWT({
@@ -32,12 +27,12 @@ export class SheetsService {
             await this.doc.loadInfo();
 
             // Ensure we have a sheet for user data
-            let sheet = this.getSheet(this.doc);
+            let sheet = this.doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
             if (!sheet) {
                 sheet = await this.doc.addSheet({
-                    title: 'List of The Tellers Agency Academy course applicants',
+                    title: config.googleSheets.spreadsheeTabName,
                     headerValues: [
-                        'Timestamp',
+                        'Applied At',
                         'Telegram Username',
                         'Email',
                         'Name',
@@ -55,7 +50,7 @@ export class SheetsService {
     static async saveUserData(userData: UserData): Promise<void> {
         try {
             const doc = await this.initializeSheet();
-            const sheet = this.getSheet(doc);
+            const sheet = doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
             if (!sheet) {
                 throw new Error('Sheet not found');
             }

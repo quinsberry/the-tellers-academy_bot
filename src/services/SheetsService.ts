@@ -24,26 +24,30 @@ const HEADER_TITLES = {
 };
 
 export class SheetsService {
-    private doc: GoogleSpreadsheet;
+    private doc: GoogleSpreadsheet | null = null;
 
-    constructor() {
-        const jwt = new JWT({
-            email: config.googleSheets.serviceAccountEmail,
-            key: config.googleSheets.privateKey,
-            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-        });
-        this.doc = new GoogleSpreadsheet(config.googleSheets.spreadsheetId, jwt);
+    async init(): Promise<void> {
+        if (this.doc) return;
+        
+        try {
+            console.log('🔍 Initializing Google Sheets connection...');
+            console.log('📊 Spreadsheet ID:', config.googleSheets.spreadsheetId);
+            console.log('📋 Sheet name:', config.googleSheets.spreadsheeTabName);
 
-        this.init();
-    }
+            const jwt = new JWT({
+                email: config.googleSheets.serviceAccountEmail,
+                key: config.googleSheets.privateKey,
+                scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+            });
+            this.doc = new GoogleSpreadsheet(config.googleSheets.spreadsheetId, jwt);
 
-    async init() {
-        if (this.doc) {
             await this.doc.loadInfo();
+            console.log('✅ Spreadsheet loaded:', this.doc.title);
 
             // Ensure we have a sheet for user data
             let sheet = this.doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
             if (!sheet) {
+                console.log(`📝 Creating sheet "${config.googleSheets.spreadsheeTabName}"...`);
                 sheet = await this.doc.addSheet({
                     title: config.googleSheets.spreadsheeTabName,
                     headerValues: [
@@ -56,17 +60,33 @@ export class SheetsService {
                         HEADER_TITLES.courseName,
                     ],
                 });
+                console.log('✅ Sheet created successfully');
+            } else {
+                console.log(`✅ Sheet "${config.googleSheets.spreadsheeTabName}" found`);
             }
+        } catch (error) {
+            console.error('❌ Failed to initialize Google Sheets:', error);
+            throw error;
         }
     }
 
     async saveUserData(userData: UserData): Promise<void> {
+        if (!this.doc) {
+            throw new Error('Google Sheets is not initialized');
+        }
+
         try {
             const sheet = this.doc.sheetsByTitle[config.googleSheets.spreadsheeTabName];
             if (!sheet) {
-                throw new Error('Sheet not found');
+                throw new Error(
+                    `Sheet "${config.googleSheets.spreadsheeTabName}" not found. Available sheets: ${Object.keys(
+                        this.doc.sheetsByTitle,
+                    ).join(', ')}`,
+                );
             }
-            console.log('userData: ', userData);
+
+            console.log('💾 Saving user data:', userData.telegramUsername);
+
             await sheet.addRow({
                 [HEADER_TITLES.appliedAt]: formatTimestamp(userData.timestamp),
                 [HEADER_TITLES.telegramUsername]: userData.telegramUsername,
@@ -77,9 +97,9 @@ export class SheetsService {
                 [HEADER_TITLES.courseName]: userData.courseName,
             });
 
-            console.log(`User data saved to Google Sheets successfully: ${userData.telegramUsername}`);
+            console.log(`✅ User data saved successfully: ${userData.telegramUsername}`);
         } catch (error) {
-            console.error('Error saving user data to Google Sheets:', error);
+            console.error('❌ Error saving user data to Google Sheets:', error);
             throw error;
         }
     }

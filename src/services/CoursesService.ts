@@ -25,13 +25,18 @@ export interface CoursesData {
 }
 
 export class CoursesService {
-    private coursesData: CoursesData;
+    private coursesData: CoursesData | null = null;
 
-    constructor() {
-		this.coursesData = this.loadCourses();
+    async init(): Promise<void> {
+        console.log('🔍 Initializing Courses...');
+        this.coursesData = this.loadCourses();
+        console.log('✅ Courses initialized');
     }
 
     getAllCourses(): Course[] {
+        if (!this.coursesData) {
+            throw new Error('Courses are not initialized');
+        }
         return this.coursesData.courses;
     }
 
@@ -41,9 +46,14 @@ export class CoursesService {
     }
 
     private loadCourses(): CoursesData {
-        const coursesPath = path.join(__dirname, '..', 'data.json');
-        const coursesFile = fs.readFileSync(coursesPath, 'utf-8');
-        return JSON.parse(coursesFile);
+        try {
+            const coursesPath = path.join(__dirname, '..', 'data.json');
+            const coursesFile = fs.readFileSync(coursesPath, 'utf-8');
+            return JSON.parse(coursesFile);
+        } catch (error) {
+            console.error('❌ Failed to load courses:', error);
+            throw error;
+        }
     }
 }
 

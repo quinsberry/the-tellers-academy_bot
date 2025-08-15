@@ -2,11 +2,11 @@ import { BotContext } from '../types';
 import { validateEmail, validateName, validateWorkPosition } from '../utils/validators';
 import { logWarn } from '../utils/logger';
 import { handleUserError, withRetry } from '../utils/errorHandler';
+import { sanitizeUserInput } from '../utils/security';
 import {
     generateBackToCourseKeyboard,
     generateSuccessMessage,
     generateFinalKeyboard,
-    RETRY_SAVE_DATA_KEY,
     BACK_TO_COURSES_KEY,
 } from '../messages/courseMessages';
 import { coursesService } from '@/services/CoursesService';
@@ -17,7 +17,9 @@ import { getCurrentTimestamp } from '../utils/formatDates';
  * Handle email input with validation
  */
 export async function handleEmailInput(ctx: BotContext, email: string): Promise<void> {
-    const validation = validateEmail(email);
+    // Sanitize input first
+    const sanitizedEmail = sanitizeUserInput(email);
+    const validation = validateEmail(sanitizedEmail);
 
     if (!validation.isValid) {
         if (validation.error?.includes('Did you mean')) {
@@ -44,7 +46,9 @@ export async function handleEmailInput(ctx: BotContext, email: string): Promise<
  * Handle name input with validation
  */
 export async function handleNameInput(ctx: BotContext, name: string): Promise<void> {
-    const validation = validateName(name);
+    // Sanitize input first
+    const sanitizedName = sanitizeUserInput(name);
+    const validation = validateName(sanitizedName);
 
     if (!validation.isValid) {
         await ctx.reply(validation.error!);
@@ -67,7 +71,9 @@ export async function handleNameInput(ctx: BotContext, name: string): Promise<vo
  * Handle work position input with validation and save data
  */
 export async function handlePositionInput(ctx: BotContext, position: string): Promise<void> {
-    const validation = validateWorkPosition(position);
+    // Sanitize input first
+    const sanitizedPosition = sanitizeUserInput(position);
+    const validation = validateWorkPosition(sanitizedPosition);
 
     if (!validation.isValid) {
         await ctx.reply(validation.error!);
@@ -213,8 +219,11 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
  * Route text messages to appropriate handlers based on current step
  */
 export async function handleTextMessage(ctx: BotContext): Promise<void> {
-    const text = ctx.message?.text?.trim();
-    if (!text) return;
+    const rawText = ctx.message?.text?.trim();
+    if (!rawText) return;
+
+    // Sanitize input for security
+    const text = sanitizeUserInput(rawText);
 
     switch (ctx.session.step) {
         case 'entering_email':

@@ -4,6 +4,7 @@ import { JWT } from 'google-auth-library';
 import { formatTimestamp } from '@/utils/formatDates';
 import { logInfo, logError } from '@/utils/logger';
 import { withRetry, handleSystemError } from '@/utils/errorHandler';
+import { maskSensitiveData } from '@/utils/security';
 
 export interface UserData {
     telegramUsername: string;
@@ -97,11 +98,13 @@ export class SheetsService {
                 );
             }
 
-            logInfo('Saving user data', {
+            logInfo('Saving user data', maskSensitiveData({
                 username: userData.telegramUsername,
+                email: userData.email,
+                name: userData.name,
                 courseId: userData.courseId,
                 courseName: userData.courseName,
-            });
+            }));
 
             await withRetry(
                 () =>
@@ -118,7 +121,11 @@ export class SheetsService {
                 1000,
             );
 
-            logInfo('User data saved successfully', { username: userData.telegramUsername });
+            logInfo('User data saved successfully', maskSensitiveData({ 
+                username: userData.telegramUsername,
+                email: userData.email,
+                name: userData.name,
+            }));
         } catch (error) {
             logError('Error saving user data to Google Sheets', error as Error);
             throw error;

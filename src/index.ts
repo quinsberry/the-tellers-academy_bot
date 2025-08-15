@@ -1,5 +1,5 @@
 import { bot } from './bot';
-import { config } from './config';
+import { config, validateConfigEnv } from './config';
 import { coursesService } from './services/CoursesService';
 import { sheetsService } from './services/SheetsService';
 import { logInfo, logError } from './utils/logger';
@@ -8,6 +8,8 @@ async function main() {
     console.log('🤖 Starting Telegram Course Bot...\n');
 
     try {
+        validateConfigEnv();
+
         // Initialize services first
         console.log('🔧 Initializing services...');
         await Promise.all([sheetsService.init(), coursesService.init()]);

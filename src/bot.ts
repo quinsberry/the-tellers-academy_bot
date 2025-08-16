@@ -7,6 +7,7 @@ import { handleStart, handleHelp } from './handlers/commandHandlers';
 import { handleCourseSelection, handleBackToCourses, handleBuyCourse } from './handlers/courseHandlers';
 import { handleTextMessage, handleRetrySaveData } from './handlers/inputHandlers';
 import { BUY_COURSE_KEY, BACK_TO_COURSES_KEY, RETRY_SAVE_DATA_KEY } from './messages/courseMessages';
+import { b, fmt, u } from '@grammyjs/parse-mode';
 
 // Create bot instance
 const bot = new Bot<BotContext>(config.telegram.botToken);
@@ -35,6 +36,12 @@ bot.use(async (ctx, next) => {
     }
 
     await next();
+});
+
+bot.command("demo", async (ctx) => {
+	// Using return values of fmt
+	const combined = fmt`${b}bolded${b} ${ctx.msg.text} ${u}underlined${u}`;
+	await ctx.reply(combined.text, { entities: combined.entities });
 });
 
 // Command handlers

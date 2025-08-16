@@ -32,6 +32,8 @@ export async function showWelcomeAndCourses(ctx: BotContext, edit = false): Prom
         const message = generateWelcomeMessage(courses);
         const keyboard = generateCourseKeyboard(courses);
 
+        console.log('message:', message);
+
         const replyMarkup = {
             reply_markup: {
                 inline_keyboard: keyboard,
@@ -39,9 +41,15 @@ export async function showWelcomeAndCourses(ctx: BotContext, edit = false): Prom
         };
 
         if (edit) {
-            await ctx.editMessageText(message, { ...replyMarkup, parse_mode: 'Markdown' });
+            await ctx.editMessageText(message.text, {
+                ...replyMarkup,
+                entities: message.entities,
+            });
         } else {
-            await ctx.reply(message, { ...replyMarkup, parse_mode: 'Markdown' });
+            await ctx.reply(message.text, {
+                ...replyMarkup,
+                entities: message.entities,
+            });
         }
     } catch (error) {
         await handleUserError(
@@ -75,7 +83,8 @@ export async function handleCourseSelection(ctx: BotContext, courseId: number): 
         const message = generateCourseDetails(course);
         const keyboard = generateCourseDetailKeyboard(courseId);
 
-        await ctx.editMessageText(message, {
+        await ctx.editMessageText(message.text, {
+            entities: message.entities,
             reply_markup: {
                 inline_keyboard: keyboard,
             },

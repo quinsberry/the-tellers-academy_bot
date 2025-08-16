@@ -1,18 +1,18 @@
+import { DEFAULT_LANGUAGE, LANGUAGE_LOCALES } from '@/services/LocalizationService';
 import { config } from '../config';
 
 /**
  * Format course date consistently in UTC (assuming course dates are stored as YYYY-MM-DD)
  */
-export const formatCourseDate = (dateString: string): string => {
-    // For course dates (YYYY-MM-DD format), treat as UTC to avoid timezone shifts
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // Create date in local timezone but treat as intended date
-    
-    return date.toLocaleDateString('en-US', {
+export const formatCourseDate = (
+    dateString: string,
+    locale: Intl.LocalesArgument = LANGUAGE_LOCALES[DEFAULT_LANGUAGE],
+): string => {
+    return new Date(dateString).toLocaleDateString(locale, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        timeZone: 'UTC' // Force UTC to prevent timezone shifts
+        timeZone: 'UTC', // Force UTC to prevent timezone shifts
     });
 };
 
@@ -21,7 +21,7 @@ export const formatCourseDate = (dateString: string): string => {
  */
 export const formatTimestamp = (timestamp: string, timezone: string = config.app.timezone): string => {
     const date = new Date(timestamp);
-    
+
     // Format in the specified timezone
     const formatter = new Intl.DateTimeFormat('en-GB', {
         timeZone: timezone,
@@ -30,17 +30,17 @@ export const formatTimestamp = (timestamp: string, timezone: string = config.app
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
     });
-    
+
     const parts = formatter.formatToParts(date);
-    const day = parts.find(p => p.type === 'day')?.value;
-    const month = parts.find(p => p.type === 'month')?.value;
-    const year = parts.find(p => p.type === 'year')?.value;
-    const hour = parts.find(p => p.type === 'hour')?.value;
-    const minute = parts.find(p => p.type === 'minute')?.value;
-    const dayPeriod = parts.find(p => p.type === 'dayPeriod')?.value;
-    
+    const day = parts.find((p) => p.type === 'day')?.value;
+    const month = parts.find((p) => p.type === 'month')?.value;
+    const year = parts.find((p) => p.type === 'year')?.value;
+    const hour = parts.find((p) => p.type === 'hour')?.value;
+    const minute = parts.find((p) => p.type === 'minute')?.value;
+    const dayPeriod = parts.find((p) => p.type === 'dayPeriod')?.value;
+
     return `${day}.${month}.${year}, ${hour}:${minute} ${dayPeriod?.toUpperCase()}`;
 };
 

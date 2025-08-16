@@ -1,5 +1,7 @@
-import { type Course } from '@/services/CoursesService';
+import { Lecture, type Course } from '@/services/CoursesService';
 import { formatCourseDate } from '@/utils/formatDates';
+import { localizationService } from '@/services/LocalizationService';
+import { b, fmt, FormattedString } from '@grammyjs/parse-mode';
 
 export const BUY_COURSE_KEY = 'buy_course';
 export const BACK_TO_COURSES_KEY = 'back_to_courses';
@@ -8,41 +10,51 @@ export const RETRY_SAVE_DATA_KEY = 'retry_save_data';
 /**
  * Generate welcome message with course list
  */
-export function generateWelcomeMessage(courses: Course[]): string {
-    let message = '🎓 *Welcome to the Tellers Agency Academy*\n\n';
-    message += '📚 *Available Courses:*\n\n';
+export function generateWelcomeMessage(courses: Course[]): FormattedString {
+    const generateCourse = (course: Course, idx: number) => {
+        const courseTime = `${formatCourseDate(course.start_date)} — ${formatCourseDate(course.end_date)}`;
+        return FormattedString.join([
+            fmt`${idx + 1}. ${course.name}\n\n`,
+            `${localizationService.t('welcome.courseTime')}: ${courseTime}\n`,
+            `${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}\n\n`,
+        ]);
+    };
 
-    courses.forEach((course) => {
-        message += `*${course.name}*\n`;
-        message += `${course.short_description}\n\n`;
-        message += `   📅 Starts: *${formatCourseDate(course.start_date)}*\n`;
-        message += `   💰 ${course.price} ${course.currency}\n\n`;
-    });
-
-    message += '👇 *Select a course to view details:*';
-    return message;
+    return FormattedString.join([
+        fmt`${b}${localizationService.t('welcome.title')}${b}\n`,
+        fmt`${localizationService.t('welcome.subtitle')}\n\n`,
+        fmt`${b}${localizationService.t('welcome.availableCourses', { count: courses.length })}${b}\n\n`,
+        ...courses.map(generateCourse),
+    ]);
 }
 
 /**
  * Generate course detail message
  */
-export function generateCourseDetails(course: Course): string {
-    const formatedAuthors = course.authors.map((author) => author.name).join(', ');
-    return (
-        `📖 ${course.name}\n\n` +
-        `📝 ${course.description}\n\n` +
-        `👥 Authors: ${formatedAuthors}\n\n` +
-        `📅 Start Date: ${formatCourseDate(course.start_date)}\n` +
-        `📅 End Date: ${formatCourseDate(course.end_date)}\n\n` +
-        `💰 Price: ${course.price} ${course.currency}`
-    );
+export function generateCourseDetails(course: Course): FormattedString {
+    const generateLecture = (lecture: Lecture) => {
+        return FormattedString.join([
+            fmt`${b}${localizationService.t('course.details.lecture')} ${lecture.number}: ${lecture.name}${b}\n`,
+            fmt`${b}${localizationService.t('course.details.speaker')}${b}: ${lecture.speaker}\n`,
+            fmt`${b}${localizationService.t('course.details.dateAndTime')}${b}: ${lecture.dateAndTime}\n\n`,
+            fmt`${lecture.description}\n\n\n`,
+        ]);
+    };
+
+    return FormattedString.join([
+        fmt`${b}${course.details.title}${b}\n\n`,
+        fmt`${course.details.description}\n\n`,
+        fmt`${b}${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}${b}\n\n`,
+        fmt`${b}${localizationService.t('course.details.courseProgram')}${b}\n\n`,
+        ...course.details.lectures.map(generateLecture),
+    ]);
 }
 
 /**
  * Generate course selection keyboard
  */
 export function generateCourseKeyboard(courses: Course[]) {
-    return courses.map((course) => [{ text: course.name, callback_data: `course_${course.id}` }]);
+    return courses.map((course) => [{ text: course.short_name, callback_data: `course_${course.id}` }]);
 }
 
 /**
@@ -50,8 +62,8 @@ export function generateCourseKeyboard(courses: Course[]) {
  */
 export function generateCourseDetailKeyboard(courseId: number) {
     return [
-        [{ text: '💳 Buy the course', callback_data: BUY_COURSE_KEY }],
-        [{ text: '← Back to courses', callback_data: BACK_TO_COURSES_KEY }],
+        [{ text: localizationService.t('buttons.buyCourse'), callback_data: BUY_COURSE_KEY }],
+        [{ text: localizationService.t('buttons.backToCourses'), callback_data: BACK_TO_COURSES_KEY }],
     ];
 }
 

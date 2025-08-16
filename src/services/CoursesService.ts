@@ -7,14 +7,25 @@ export interface Author {
     image: string;
 }
 
+export interface Lecture {
+    number: number;
+    name: string;
+    speaker: string;
+    dateAndTime: string;
+    description: string;
+}
+
 export interface Course {
     id: number;
     name: string;
-    short_description: string;
-    description: string;
-    authors: Author[];
+    short_name: string;
+    details: {
+        title: string;
+        description: string;
+        lectures: Lecture[];
+    };
     price: number;
-    currency: string;
+    currency_symbol: string;
     start_date: string;
     end_date: string;
     image: string;

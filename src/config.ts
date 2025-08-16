@@ -14,7 +14,8 @@ export const config = {
         privateKey: process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
     },
     app: {
-        maxRequestsPerMinutePerUser: 5,
+        maxRequestsPerMinutePerUser: 100,
+        defaultLanguage: 'ua',
         nodeEnv: process.env.NODE_ENV || 'development',
         port: parseInt(process.env.PORT || '3000', 10),
         timezone: process.env.APP_TIMEZONE || 'Europe/Kiev',

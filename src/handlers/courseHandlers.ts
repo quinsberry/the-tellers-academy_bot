@@ -5,6 +5,7 @@ import { handleUserError } from '../utils/errorHandler';
 import { InputFile } from 'grammy';
 import * as path from 'path';
 import * as fs from 'fs';
+import { safeAnswerCallbackQuery, handleCallbackWithExpiration } from '../utils/callbackHelpers';
 import {
     generateWelcomeMessage,
     generateCourseKeyboard,
@@ -92,36 +93,36 @@ export async function showWelcomeAndCourses(ctx: BotContext, edit = false): Prom
  * Handle course selection and show course details
  */
 export async function handleCourseSelection(ctx: BotContext, courseId: number): Promise<void> {
-    try {
-        const course = coursesService.getCourseById(courseId);
+    await handleCallbackWithExpiration(
+        ctx,
+        async (ctx) => {
+            const course = coursesService.getCourseById(courseId);
 
-        if (!course) {
-            await ctx.answerCallbackQuery(localizationService.t('course.notFound'));
-            return;
-        }
+            if (!course) {
+                await safeAnswerCallbackQuery(ctx, localizationService.t('course.notFound'));
+                return;
+            }
 
-        ctx.session.selectedCourseId = courseId;
-        ctx.session.step = 'course_detail';
+            ctx.session.selectedCourseId = courseId;
+            ctx.session.step = 'course_detail';
 
-        const message = generateCourseDetails(course);
-        const keyboard = generateCourseDetailKeyboard(courseId);
+            const message = generateCourseDetails(course);
+            const keyboard = generateCourseDetailKeyboard(courseId);
 
-        await ctx.editMessageText(message.text, {
-            entities: message.entities,
-            reply_markup: {
-                inline_keyboard: keyboard,
-            },
-        });
-
-        try {
-            await ctx.answerCallbackQuery();
-        } catch (error) {
-            logWarn('Callback query already expired, continuing', {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
+            await ctx.editMessageText(message.text, {
+                entities: message.entities,
+                reply_markup: {
+                    inline_keyboard: keyboard,
+                },
             });
+
+            await safeAnswerCallbackQuery(ctx);
+        },
+        // Refresh action for expired callbacks
+        async () => {
+            await showWelcomeAndCourses(ctx, true);
         }
-    } catch (error) {
+    ).catch(async (error) => {
         logError('Error showing course details', error as Error, {
             userId: ctx.from?.id,
             username: ctx.from?.username,
@@ -138,22 +139,28 @@ export async function handleCourseSelection(ctx: BotContext, courseId: number): 
                 operation: 'load_course_details',
             },
         );
-    }
+    });
 }
 
 /**
  * Handle back to courses action
  */
 export async function handleBackToCourses(ctx: BotContext): Promise<void> {
-    try {
-        await ctx.answerCallbackQuery();
-    } catch (error) {
-        console.log('⚠️ Callback query already expired, continuing...');
-    }
-    
-    // Reset session when going back to courses
-    ctx.session = { step: 'start' };
-    await showWelcomeAndCourses(ctx, true);
+    await handleCallbackWithExpiration(
+        ctx,
+        async (ctx) => {
+            await safeAnswerCallbackQuery(ctx);
+            
+            // Reset session when going back to courses
+            ctx.session = { step: 'start' };
+            await showWelcomeAndCourses(ctx, true);
+        },
+        // Refresh action for expired callbacks
+        async () => {
+            ctx.session = { step: 'start' };
+            await showWelcomeAndCourses(ctx, false); // Send new message instead of editing
+        }
+    );
 }
 
 /**

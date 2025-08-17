@@ -8,6 +8,8 @@ import { handleCourseSelection, handleBackToCourses, handleBuyCourse, handlePriv
 import { handleTextMessage, handleRetrySaveData } from './handlers/inputHandlers';
 import { BUY_COURSE_KEY, BACK_TO_COURSES_KEY, BACK_TO_BANKS_KEY, RETRY_SAVE_DATA_KEY, SELECT_PRIVATBANK_KEY, SELECT_MONOBANK_KEY } from './messages/courseMessages';
 import { b, fmt, u } from '@grammyjs/parse-mode';
+import { safeAnswerCallbackQuery } from './utils/callbackHelpers';
+import { localizationService } from './services/LocalizationService';
 
 // Create bot instance
 const bot = new Bot<BotContext>(config.telegram.botToken);
@@ -21,6 +23,25 @@ function initial(): UserSession {
 }
 
 bot.use(session({ initial }));
+
+// Global callback query middleware for handling expired callbacks
+bot.on('callback_query', async (ctx, next) => {
+    // Check if callback query is too old (older than 2 hours)
+    const messageDate = ctx.callbackQuery.message?.date;
+    if (messageDate) {
+        const ageMinutes = (Date.now() - messageDate * 1000) / (1000 * 60);
+        if (ageMinutes > 120) { // 2 hours
+            await safeAnswerCallbackQuery(
+                ctx, 
+                localizationService.t('errors.expiredCallback'), 
+                { show_alert: true }
+            );
+            return; // Don't proceed to the actual handler
+        }
+    }
+    
+    await next();
+});
 
 // bot.
 

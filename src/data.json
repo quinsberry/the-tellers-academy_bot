@@ -42,18 +42,20 @@
             "currency_symbol": "₴",
             "start_date": "2025-09-16",
             "end_date": "2025-09-20",
-            "payment:": {
+            "payment": {
                 "privatbank": {
                     "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMjcwMC4wCjM1MzQxMDE4MDEKCgqz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",
                     "qr_code": "./images/privat_intensiv_qr.png"
                 },
                 "monobank": {
-                    "link": "https://surl.li/ccdjip",
-                    "qr_code": "https://surl.li/ccdjip"
+                    "requisites": {
+                        "iban": "UA803220010000026001320034404",
+                        "tax_id": "3534101801",
+                        "recipient": "ФОП Леонова Марія Олегівна",
+                        "description": "Інформаційні послуги The Tellers Academy"
+                    }
                 }
-            },
-            "payment_link_privatbank": "https://surli.cc/rdfpsi",
-            "payment_link_monobank": "https://surl.li/ccdjip"
+            }
         },
         {
             "id": 2,
@@ -90,18 +92,20 @@
             "currency_symbol": "₴",
             "start_date": "2025-09-26",
             "end_date": "2025-09-28",
-            "payment:": {
+            "payment": {
                 "privatbank": {
                     "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMzUwMC4wCjM1MzQxMDE4MDEKCgqz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",
                     "qr_code": "./images/privat_master-class_qr.png"
                 },
                 "monobank": {
-                    "link": "https://surl.li/ccdjip",
-                    "qr_code": "https://surl.li/ccdjip"
+                    "requisites": {
+                        "iban": "UA803220010000026001320034404",
+                        "tax_id": "3534101801",
+                        "recipient": "ФОП Леонова Марія Олегівна",
+                        "title": "Інформаційні послуги The Tellers Academy"
+                    }
                 }
-            },
-            "payment_link_privatbank": "https://surl.li/kgdeqz",
-            "payment_link_monobank": "https://surl.li/vrospx"
+            }
         }
     ]
 }

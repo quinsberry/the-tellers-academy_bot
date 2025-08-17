@@ -2,6 +2,9 @@ import { BotContext } from '../types';
 import { coursesService } from '@/services/CoursesService';
 import { logError, logWarn } from '../utils/logger';
 import { handleUserError } from '../utils/errorHandler';
+import { InputFile } from 'grammy';
+import * as path from 'path';
+import * as fs from 'fs';
 import {
     generateWelcomeMessage,
     generateCourseKeyboard,
@@ -44,10 +47,27 @@ export async function showWelcomeAndCourses(ctx: BotContext, edit = false): Prom
         };
 
         if (edit) {
-            await ctx.editMessageText(message.text, {
-                ...replyMarkup,
-                entities: message.entities,
-            });
+            try {
+                await ctx.editMessageText(message.text, {
+                    ...replyMarkup,
+                    entities: message.entities,
+                });
+            } catch (editError) {
+                // If editing fails (e.g., trying to edit a photo message), delete and send new message
+                try {
+                    await ctx.deleteMessage();
+                    await ctx.reply(message.text, {
+                        ...replyMarkup,
+                        entities: message.entities,
+                    });
+                } catch (deleteError) {
+                    // Last resort: send a new message
+                    await ctx.reply(message.text, {
+                        ...replyMarkup,
+                        entities: message.entities,
+                    });
+                }
+            }
         } else {
             await ctx.reply(message.text, {
                 ...replyMarkup,
@@ -175,15 +195,75 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
         const paymentMessage = generateBankPaymentMessage('privatbank', course);
         const keyboard = generateFinalKeyboard();
 
-        await ctx.editMessageText(paymentMessage.text, {
-            entities: paymentMessage.entities,
-            reply_markup: {
-                inline_keyboard: keyboard,
-            },
-            link_preview_options: {
-                is_disabled: true,
-            },
-        });
+        // Get QR code path from course data
+        const qrCodePath = course.payment?.privatbank?.qr_code;
+        
+        if (qrCodePath && qrCodePath.startsWith('./images/')) {
+            // Resolve the QR code file path (remove the ./ prefix and build from src directory)
+            const cleanPath = qrCodePath.replace('./', '');
+            const fullQrPath = path.join(__dirname, '..', cleanPath);
+            
+            // Check if QR code file exists
+            if (fs.existsSync(fullQrPath)) {
+                try {
+                    // Delete the previous message and send a new one with photo
+                    await ctx.deleteMessage();
+                    
+                    // Send photo with QR code
+                    await ctx.replyWithPhoto(new InputFile(fullQrPath), {
+                        caption: paymentMessage.text,
+                        caption_entities: paymentMessage.entities,
+                        reply_markup: {
+                            inline_keyboard: keyboard,
+                        },
+                    });
+                } catch (deleteError) {
+                    // If deletion fails, fall back to editing message text
+                    logWarn('Could not delete message, falling back to text edit', {
+                        userId: ctx.from?.id,
+                        username: ctx.from?.username,
+                    });
+                    
+                    await ctx.editMessageText(paymentMessage.text, {
+                        entities: paymentMessage.entities,
+                        reply_markup: {
+                            inline_keyboard: keyboard,
+                        },
+                        link_preview_options: {
+                            is_disabled: true,
+                        },
+                    });
+                }
+            } else {
+                // QR code file doesn't exist, fall back to text message
+                logWarn('QR code file not found, falling back to text message', {
+                    userId: ctx.from?.id,
+                    username: ctx.from?.username,
+                    qrPath: fullQrPath,
+                });
+                
+                await ctx.editMessageText(paymentMessage.text, {
+                    entities: paymentMessage.entities,
+                    reply_markup: {
+                        inline_keyboard: keyboard,
+                    },
+                    link_preview_options: {
+                        is_disabled: true,
+                    },
+                });
+            }
+        } else {
+            // No QR code specified, use text message
+            await ctx.editMessageText(paymentMessage.text, {
+                entities: paymentMessage.entities,
+                reply_markup: {
+                    inline_keyboard: keyboard,
+                },
+                link_preview_options: {
+                    is_disabled: true,
+                },
+            });
+        }
 
         try {
             await ctx.answerCallbackQuery();
@@ -256,7 +336,20 @@ export async function handleBackToBanks(ctx: BotContext): Promise<void> {
     try {
         if (!ctx.session.selectedCourseId) {
             await ctx.answerCallbackQuery(localizationService.t('course.notFound'));
-            await showWelcomeAndCourses(ctx, true);
+            
+            // Handle case where we might be coming from a photo message
+            try {
+                await showWelcomeAndCourses(ctx, true);
+            } catch (editError) {
+                // If editing fails, delete the photo message and send a new text message
+                try {
+                    await ctx.deleteMessage();
+                    await showWelcomeAndCourses(ctx, false);
+                } catch (deleteError) {
+                    // Last resort: just send a new message
+                    await showWelcomeAndCourses(ctx, false);
+                }
+            }
             return;
         }
 
@@ -266,12 +359,39 @@ export async function handleBackToBanks(ctx: BotContext): Promise<void> {
         const bankSelectionMessage = generateBankSelectionMessage();
         const keyboard = generateBankSelectionKeyboard(ctx.session.selectedCourseId);
 
-        await ctx.editMessageText(bankSelectionMessage.text, {
-            entities: bankSelectionMessage.entities,
-            reply_markup: {
-                inline_keyboard: keyboard,
-            },
-        });
+        try {
+            // Try to edit message text first
+            await ctx.editMessageText(bankSelectionMessage.text, {
+                entities: bankSelectionMessage.entities,
+                reply_markup: {
+                    inline_keyboard: keyboard,
+                },
+            });
+        } catch (editError) {
+            // If editing fails (e.g., trying to edit a photo message), delete and send new message
+            try {
+                await ctx.deleteMessage();
+                await ctx.reply(bankSelectionMessage.text, {
+                    entities: bankSelectionMessage.entities,
+                    reply_markup: {
+                        inline_keyboard: keyboard,
+                    },
+                });
+            } catch (deleteError) {
+                logWarn('Could not delete message, falling back to new message', {
+                    userId: ctx.from?.id,
+                    username: ctx.from?.username,
+                });
+                
+                // Last resort: send a new message
+                await ctx.reply(bankSelectionMessage.text, {
+                    entities: bankSelectionMessage.entities,
+                    reply_markup: {
+                        inline_keyboard: keyboard,
+                    },
+                });
+            }
+        }
 
         try {
             await ctx.answerCallbackQuery();

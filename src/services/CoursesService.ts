@@ -34,12 +34,14 @@ export interface Course {
             qr_code: string;
         };
         monobank: {
-            link: string;
-            qr_code: string;
+            requisites: {
+                iban: string;
+                tax_id: string;
+                recipient: string;
+                description: string;
+            };
         };
     };
-    payment_link_privatbank: string;
-    payment_link_monobank: string;
 }
 
 export interface CoursesData {

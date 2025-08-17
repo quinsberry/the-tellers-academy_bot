@@ -1,7 +1,7 @@
 import { Lecture, type Course } from '@/services/CoursesService';
 import { formatCourseDate } from '@/utils/formatDates';
 import { localizationService } from '@/services/LocalizationService';
-import { a, b, fmt, FormattedString } from '@grammyjs/parse-mode';
+import { a, b, code, fmt, FormattedString } from '@grammyjs/parse-mode';
 import { config } from '@/config';
 
 export const BUY_COURSE_KEY = 'buy_course';
@@ -105,14 +105,36 @@ export function generateBankSelectionKeyboard(courseId: number) {
  * Generate bank-specific payment message
  */
 export function generateBankPaymentMessage(bank: 'privatbank' | 'monobank', course: Course): FormattedString {
-    const paymentLink = bank === 'privatbank' ? course.payment_link_privatbank : course.payment_link_monobank;
+
+    let paymentDetails: FormattedString
     
+    if (bank === 'privatbank') {
+        paymentDetails = FormattedString.join([
+            fmt`${localizationService.t('payment.scanQROR')} ${a(course.payment.privatbank.link)}${localizationService.t('payment.followTheLink')}${a}\n\n`,
+        ]);
+    } else if (bank === 'monobank') {
+        paymentDetails = FormattedString.join([
+            fmt`${b}${localizationService.t('payment.requisites.iban')}${b}\n`,
+            fmt`${code}${course.payment.monobank.requisites.iban}${code}\n\n`,
+            fmt`${b}${localizationService.t('payment.requisites.tax_id')}${b}\n`,
+            fmt`${code}${course.payment.monobank.requisites.tax_id}${code}\n\n`,
+            fmt`${b}${localizationService.t('payment.requisites.recipient')}${b}\n`,
+            fmt`${code}${course.payment.monobank.requisites.recipient}${code}\n\n`,
+            fmt`${b}${localizationService.t('payment.requisites.description')}${b}\n`,
+            fmt`${code}${course.payment.monobank.requisites.description}${code}\n\n`,
+        ]);
+    } else {
+        throw new Error('Invalid bank');
+    }
+
     return FormattedString.join([
         fmt`${b}${localizationService.t(`payment.bankDetails.${bank}.title`)}${b}\n\n`,
         fmt`${b}${course.name}${b}\n`,
-        fmt`${b}${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}${b}\n\n`,
-        fmt`${localizationService.t(`payment.bankDetails.${bank}.instructions`)}\n\n`,
-        fmt`${a(paymentLink)}💳 ${localizationService.t('payment.choosePaymentMethod')}${a}\n\n`,
+        fmt`${b}${localizationService.t('labels.price')}:${b} ${course.price}${course.currency_symbol}\n\n`,
+        fmt`${b}${localizationService.t('payment.requisites.requisitesTitle')}:${b}\n`,
+        fmt`(${localizationService.t('payment.requisites.copyInstructions')})\n\n`,
+        paymentDetails,
+        fmt`${localizationService.t('payment.paymentDetails')}\n\n`,
         fmt`${localizationService.t('payment.thankYou')}\n\n`,
     ]);
 }

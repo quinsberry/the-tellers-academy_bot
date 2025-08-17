@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BotContext } from '../types';
 import { config } from '@/config';
+import { logger } from '@/utils/logger';
 
 // Supported languages
 export type SupportedLanguage = 'en' | 'ua';
@@ -54,7 +55,7 @@ export class LocalizationService {
 
             return translation;
         } catch (error) {
-            console.warn(`Failed to load translation for ${language}, falling back to ${DEFAULT_LANGUAGE}`);
+            logger.warn(error as Error, `Failed to load translation for ${language}, falling back to ${DEFAULT_LANGUAGE}`);
 
             // Fallback to default language
             if (language !== DEFAULT_LANGUAGE) {
@@ -150,7 +151,7 @@ export class LocalizationService {
         const text = this.getNestedProperty(translation, key);
 
         if (text === undefined) {
-            console.warn(`Translation key "${key}" not found for language "${language}"`);
+            logger.warn(`Translation key "${key}" not found for language "${language}"`);
             return `[${key}]`;
         }
 

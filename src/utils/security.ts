@@ -1,5 +1,5 @@
 import { BotContext } from '../types';
-import { logWarn, logError } from './logger';
+import { logger } from './logger';
 
 // Rate limiting storage (in production, use Redis or database)
 const rateLimitStore = new Map<number, { count: number; resetTime: number }>();
@@ -25,11 +25,14 @@ export function checkRateLimit(
     }
 
     if (userLimit.count >= maxRequests) {
-        logWarn('Rate limit exceeded', {
-            userId,
-            count: userLimit.count,
-            maxRequests,
-        });
+        logger.warn(
+            {
+                userId,
+                count: userLimit.count,
+                maxRequests,
+            },
+            'Rate limit exceeded',
+        );
         return false;
     }
 
@@ -55,14 +58,14 @@ export function sanitizeUserInput(input: string): string {
 export function validateUserPermissions(ctx: BotContext): boolean {
     // Basic validation - in production, implement proper user roles
     if (!ctx.from?.id) {
-        logError('Invalid user context', new Error('Missing user ID'));
+        logger.error(new Error('Missing user ID'), 'Invalid user context');
         return false;
     }
 
     // Check if user is banned (implement your ban logic)
     const bannedUsers = process.env.BANNED_USER_IDS?.split(',').map(Number) || [];
     if (bannedUsers.includes(ctx.from.id)) {
-        logWarn('Banned user attempted access', { userId: ctx.from.id });
+        logger.warn({ userId: ctx.from.id }, 'Banned user attempted access');
         return false;
     }
 

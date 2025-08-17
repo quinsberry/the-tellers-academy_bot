@@ -2,7 +2,7 @@ import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { config } from '../config';
 import { JWT } from 'google-auth-library';
 import { formatTimestamp } from '@/utils/formatDates';
-import { logInfo, logError } from '@/utils/logger';
+import { logger } from '@/utils/logger';
 import { withRetry, handleSystemError } from '@/utils/errorHandler';
 import { maskSensitiveData } from '@/utils/security';
 
@@ -98,13 +98,13 @@ export class SheetsService {
                 );
             }
 
-            logInfo('Saving user data', maskSensitiveData({
+            logger.info(maskSensitiveData({
                 username: userData.telegramUsername,
                 email: userData.email,
                 name: userData.name,
                 courseId: userData.courseId,
                 courseName: userData.courseName,
-            }));
+            }), 'Saving user data');
 
             await withRetry(
                 () =>
@@ -121,13 +121,13 @@ export class SheetsService {
                 1000,
             );
 
-            logInfo('User data saved successfully', maskSensitiveData({ 
+            logger.info(maskSensitiveData({ 
                 username: userData.telegramUsername,
                 email: userData.email,
                 name: userData.name,
-            }));
+            }), 'User data saved successfully');
         } catch (error) {
-            logError('Error saving user data to Google Sheets', error as Error);
+            logger.error(error as Error, 'Error saving user data to Google Sheets');
             throw error;
         }
     }

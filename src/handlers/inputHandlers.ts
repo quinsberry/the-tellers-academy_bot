@@ -1,14 +1,12 @@
 import { BotContext } from '../types';
 import { validateEmail, validateName, validateWorkPosition } from '../utils/validators';
-import { logWarn } from '../utils/logger';
+import { logger } from '@/utils/logger';
 import { handleUserError, withRetry } from '../utils/errorHandler';
 import { sanitizeUserInput } from '../utils/security';
 import {
     generateBackToCourseKeyboard,
     generateBankSelectionMessage,
     generateBankSelectionKeyboard,
-    generateSuccessMessage,
-    generateFinalKeyboard,
     BACK_TO_COURSES_KEY,
 } from '../messages/courseMessages';
 import { coursesService } from '@/services/CoursesService';
@@ -135,10 +133,10 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
         try {
             await ctx.answerCallbackQuery();
         } catch (error) {
-            logWarn('Callback query already expired, continuing', {
+            logger.warn({
                 userId: ctx.from?.id,
                 username: ctx.from?.username,
-            });
+            }, 'Callback query already expired, continuing');
         }
         await ctx.editMessageText(localizationService.t('errors.dataSaving.incomplete'), {
             reply_markup: {
@@ -153,10 +151,10 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
     try {
         await ctx.answerCallbackQuery();
     } catch (error) {
-        logWarn('Callback query already expired, continuing', {
+        logger.warn({
             userId: ctx.from?.id,
             username: ctx.from?.username,
-        });
+        }, 'Callback query already expired, continuing');
     }
     await ctx.editMessageText(localizationService.t('errors.dataSaving.retrying'));
 

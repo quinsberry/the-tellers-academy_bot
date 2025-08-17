@@ -1,5 +1,5 @@
 import { BotContext } from '../types';
-import { logError, logWarn } from './logger';
+import { logger } from './logger';
 import { config } from '../config';
 import { localizationService } from '@/services/LocalizationService';
 
@@ -12,11 +12,15 @@ export async function handleUserError(
     userMessage: string = localizationService.t('errors.general.somethingWrong'),
     context?: Record<string, any>,
 ): Promise<void> {
-    logError('User error occurred', error, {
-        userId: ctx.from?.id,
-        username: ctx.from?.username,
-        ...context,
-    });
+    logger.error(
+        {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+            ...context,
+            error,
+        },
+        'User error occurred',
+    );
 
     try {
         await ctx.reply(userMessage, {
@@ -31,7 +35,13 @@ export async function handleUserError(
             },
         });
     } catch (replyError) {
-        logError('Failed to send error message to user', replyError as Error, context);
+        logger.error(
+            {
+                ...context,
+                error: replyError,
+            },
+            'Failed to send error message to user',
+        );
     }
 }
 
@@ -39,7 +49,13 @@ export async function handleUserError(
  * Handle system errors (non-user facing)
  */
 export function handleSystemError(error: Error, context?: Record<string, any>): void {
-    logError('System error occurred', error, context);
+    logger.error(
+        {
+            ...context,
+            error,
+        },
+        'System error occurred',
+    );
 
     // In production, you might want to send alerts to monitoring service
     if (config.app.nodeEnv === 'production') {
@@ -68,11 +84,11 @@ export async function withRetry<T>(
             }
 
             const delay = baseDelay * Math.pow(2, attempt - 1);
-            logWarn(`Retry attempt ${attempt}/${maxRetries} failed, retrying in ${delay}ms`, {
+            logger.warn({
                 error: lastError,
                 attempt,
                 maxRetries,
-            });
+            }, `Retry attempt ${attempt}/${maxRetries} failed, retrying in ${delay}ms`);
 
             await new Promise((resolve) => setTimeout(resolve, delay));
         }

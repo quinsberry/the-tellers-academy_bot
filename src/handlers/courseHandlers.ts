@@ -1,6 +1,6 @@
 import { BotContext } from '../types';
 import { coursesService } from '@/services/CoursesService';
-import { logError, logWarn } from '../utils/logger';
+import { logger } from '@/utils/logger';
 import { handleUserError } from '../utils/errorHandler';
 import { InputFile } from 'grammy';
 import * as path from 'path';
@@ -76,16 +76,11 @@ export async function showWelcomeAndCourses(ctx: BotContext, edit = false): Prom
             });
         }
     } catch (error) {
-        await handleUserError(
-            ctx,
-            error as Error,
-            localizationService.t('course.errorLoading'),
-            {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-                operation: 'load_courses',
-            },
-        );
+        await handleUserError(ctx, error as Error, localizationService.t('course.errorLoading'), {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+            operation: 'load_courses',
+        });
     }
 }
 
@@ -121,24 +116,14 @@ export async function handleCourseSelection(ctx: BotContext, courseId: number): 
         // Refresh action for expired callbacks
         async () => {
             await showWelcomeAndCourses(ctx, true);
-        }
+        },
     ).catch(async (error) => {
-        logError('Error showing course details', error as Error, {
+        await handleUserError(ctx, error as Error, localizationService.t('course.errorLoadingDetails'), {
             userId: ctx.from?.id,
             username: ctx.from?.username,
             courseId,
+            operation: 'load_course_details',
         });
-        await handleUserError(
-            ctx,
-            error as Error,
-            localizationService.t('course.errorLoadingDetails'),
-            {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-                courseId,
-                operation: 'load_course_details',
-            },
-        );
     });
 }
 
@@ -150,7 +135,7 @@ export async function handleBackToCourses(ctx: BotContext): Promise<void> {
         ctx,
         async (ctx) => {
             await safeAnswerCallbackQuery(ctx);
-            
+
             // Reset session when going back to courses
             ctx.session = { step: 'start' };
             await showWelcomeAndCourses(ctx, true);
@@ -159,7 +144,7 @@ export async function handleBackToCourses(ctx: BotContext): Promise<void> {
         async () => {
             ctx.session = { step: 'start' };
             await showWelcomeAndCourses(ctx, false); // Send new message instead of editing
-        }
+        },
     );
 }
 
@@ -190,7 +175,7 @@ export async function handleBuyCourse(ctx: BotContext): Promise<void> {
 export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> {
     try {
         const course = coursesService.getCourseById(ctx.session.selectedCourseId!);
-        
+
         if (!course) {
             await ctx.answerCallbackQuery(localizationService.t('course.notFound'));
             return;
@@ -204,18 +189,18 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
 
         // Get QR code path from course data
         const qrCodePath = course.payment?.privatbank?.qr_code;
-        
+
         if (qrCodePath && qrCodePath.startsWith('./images/')) {
             // Resolve the QR code file path (remove the ./ prefix and build from src directory)
             const cleanPath = qrCodePath.replace('./', '');
             const fullQrPath = path.join(__dirname, '..', cleanPath);
-            
+
             // Check if QR code file exists
             if (fs.existsSync(fullQrPath)) {
                 try {
                     // Delete the previous message and send a new one with photo
                     await ctx.deleteMessage();
-                    
+
                     // Send photo with QR code
                     await ctx.replyWithPhoto(new InputFile(fullQrPath), {
                         caption: paymentMessage.text,
@@ -226,11 +211,6 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
                     });
                 } catch (deleteError) {
                     // If deletion fails, fall back to editing message text
-                    logWarn('Could not delete message, falling back to text edit', {
-                        userId: ctx.from?.id,
-                        username: ctx.from?.username,
-                    });
-                    
                     await ctx.editMessageText(paymentMessage.text, {
                         entities: paymentMessage.entities,
                         reply_markup: {
@@ -243,12 +223,6 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
                 }
             } else {
                 // QR code file doesn't exist, fall back to text message
-                logWarn('QR code file not found, falling back to text message', {
-                    userId: ctx.from?.id,
-                    username: ctx.from?.username,
-                    qrPath: fullQrPath,
-                });
-                
                 await ctx.editMessageText(paymentMessage.text, {
                     entities: paymentMessage.entities,
                     reply_markup: {
@@ -274,12 +248,7 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
 
         try {
             await ctx.answerCallbackQuery();
-        } catch (error) {
-            logWarn('Callback query already expired, continuing', {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-            });
-        }
+        } catch (error) {}
     } catch (error) {
         await handleUserError(ctx, error as Error, localizationService.t('errors.general.somethingWrong'), {
             userId: ctx.from?.id,
@@ -296,7 +265,7 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
 export async function handleMonoBankSelection(ctx: BotContext): Promise<void> {
     try {
         const course = coursesService.getCourseById(ctx.session.selectedCourseId!);
-        
+
         if (!course) {
             await ctx.answerCallbackQuery(localizationService.t('course.notFound'));
             return;
@@ -320,12 +289,7 @@ export async function handleMonoBankSelection(ctx: BotContext): Promise<void> {
 
         try {
             await ctx.answerCallbackQuery();
-        } catch (error) {
-            logWarn('Callback query already expired, continuing', {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-            });
-        }
+        } catch (error) {}
     } catch (error) {
         await handleUserError(ctx, error as Error, localizationService.t('errors.general.somethingWrong'), {
             userId: ctx.from?.id,
@@ -343,7 +307,7 @@ export async function handleBackToBanks(ctx: BotContext): Promise<void> {
     try {
         if (!ctx.session.selectedCourseId) {
             await ctx.answerCallbackQuery(localizationService.t('course.notFound'));
-            
+
             // Handle case where we might be coming from a photo message
             try {
                 await showWelcomeAndCourses(ctx, true);
@@ -385,11 +349,6 @@ export async function handleBackToBanks(ctx: BotContext): Promise<void> {
                     },
                 });
             } catch (deleteError) {
-                logWarn('Could not delete message, falling back to new message', {
-                    userId: ctx.from?.id,
-                    username: ctx.from?.username,
-                });
-                
                 // Last resort: send a new message
                 await ctx.reply(bankSelectionMessage.text, {
                     entities: bankSelectionMessage.entities,
@@ -402,12 +361,7 @@ export async function handleBackToBanks(ctx: BotContext): Promise<void> {
 
         try {
             await ctx.answerCallbackQuery();
-        } catch (error) {
-            logWarn('Callback query already expired, continuing', {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-            });
-        }
+        } catch (error) {}
     } catch (error) {
         await handleUserError(ctx, error as Error, localizationService.t('errors.general.somethingWrong'), {
             userId: ctx.from?.id,

@@ -291,6 +291,7 @@ export async function handleMonoBankSelection(ctx: BotContext): Promise<void> {
             await ctx.answerCallbackQuery();
         } catch (error) {}
     } catch (error) {
+        logger.error(error as Error, 'Error handling Monobank selection');
         await handleUserError(ctx, error as Error, localizationService.t('errors.general.somethingWrong'), {
             userId: ctx.from?.id,
             username: ctx.from?.username,

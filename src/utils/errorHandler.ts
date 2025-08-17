@@ -26,7 +26,6 @@ export async function handleUserError(
         await ctx.reply(userMessage, {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: localizationService.t('buttons.tryAgain'), callback_data: 'retry_last_action' }],
                     [{ text: localizationService.t('buttons.backToHome'), callback_data: 'back_to_courses' }],
                     ...(config.telegram.supportUrl
                         ? [[{ text: localizationService.t('buttons.contactSupport'), url: config.telegram.supportUrl }]]

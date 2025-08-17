@@ -114,6 +114,8 @@ export function generateBankPaymentMessage(bank: 'privatbank' | 'monobank', cour
         ]);
     } else if (bank === 'monobank') {
         paymentDetails = FormattedString.join([
+            fmt`${b}${localizationService.t('payment.requisites.requisitesTitle')}:${b}\n`,
+            fmt`(${localizationService.t('payment.requisites.copyInstructions')})\n\n`,
             fmt`${b}${localizationService.t('payment.requisites.iban')}${b}\n`,
             fmt`${code}${course.payment.monobank.requisites.iban}${code}\n\n`,
             fmt`${b}${localizationService.t('payment.requisites.tax_id')}${b}\n`,
@@ -131,8 +133,6 @@ export function generateBankPaymentMessage(bank: 'privatbank' | 'monobank', cour
         fmt`${b}${localizationService.t(`payment.bankDetails.${bank}.title`)}${b}\n\n`,
         fmt`${b}${course.name}${b}\n`,
         fmt`${b}${localizationService.t('labels.price')}:${b} ${course.price}${course.currency_symbol}\n\n`,
-        fmt`${b}${localizationService.t('payment.requisites.requisitesTitle')}:${b}\n`,
-        fmt`(${localizationService.t('payment.requisites.copyInstructions')})\n\n`,
         paymentDetails,
         fmt`${localizationService.t('payment.paymentDetails')}\n\n`,
         fmt`${localizationService.t('payment.thankYou')}\n\n`,

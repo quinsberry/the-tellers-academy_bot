@@ -18,7 +18,7 @@ export interface UserData {
 
 const HEADER_TITLES = {
     appliedAt: 'Applied At',
-    telegramUsername: 'tg @username',
+    telegramUsername: 'Username',
     email: 'Email',
     name: 'Name',
     workPosition: 'Work Position',

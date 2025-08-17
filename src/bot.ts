@@ -4,9 +4,9 @@ import { BotContext, UserSession } from './types';
 import { handleSystemError } from './utils/errorHandler';
 import { checkRateLimit, validateUserPermissions } from './utils/security';
 import { handleStart, handleHelp } from './handlers/commandHandlers';
-import { handleCourseSelection, handleBackToCourses, handleBuyCourse } from './handlers/courseHandlers';
+import { handleCourseSelection, handleBackToCourses, handleBuyCourse, handlePrivatBankSelection, handleMonoBankSelection, handleBackToBanks } from './handlers/courseHandlers';
 import { handleTextMessage, handleRetrySaveData } from './handlers/inputHandlers';
-import { BUY_COURSE_KEY, BACK_TO_COURSES_KEY, RETRY_SAVE_DATA_KEY } from './messages/courseMessages';
+import { BUY_COURSE_KEY, BACK_TO_COURSES_KEY, BACK_TO_BANKS_KEY, RETRY_SAVE_DATA_KEY, SELECT_PRIVATBANK_KEY, SELECT_MONOBANK_KEY } from './messages/courseMessages';
 import { b, fmt, u } from '@grammyjs/parse-mode';
 
 // Create bot instance
@@ -21,6 +21,8 @@ function initial(): UserSession {
 }
 
 bot.use(session({ initial }));
+
+// bot.
 
 // Security middleware
 bot.use(async (ctx, next) => {
@@ -55,8 +57,11 @@ bot.callbackQuery(/^course_(\d+)$/, async (ctx) => {
 });
 
 bot.callbackQuery(BACK_TO_COURSES_KEY, handleBackToCourses);
+bot.callbackQuery(BACK_TO_BANKS_KEY, handleBackToBanks);
 bot.callbackQuery(BUY_COURSE_KEY, handleBuyCourse);
 bot.callbackQuery(RETRY_SAVE_DATA_KEY, handleRetrySaveData);
+bot.callbackQuery(SELECT_PRIVATBANK_KEY, handlePrivatBankSelection);
+bot.callbackQuery(SELECT_MONOBANK_KEY, handleMonoBankSelection);
 
 // Text message handlers
 bot.on('message:text', handleTextMessage);

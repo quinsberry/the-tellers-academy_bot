@@ -1,11 +1,15 @@
 import { Lecture, type Course } from '@/services/CoursesService';
 import { formatCourseDate } from '@/utils/formatDates';
 import { localizationService } from '@/services/LocalizationService';
-import { b, fmt, FormattedString } from '@grammyjs/parse-mode';
+import { a, b, fmt, FormattedString } from '@grammyjs/parse-mode';
+import { config } from '@/config';
 
 export const BUY_COURSE_KEY = 'buy_course';
 export const BACK_TO_COURSES_KEY = 'back_to_courses';
+export const BACK_TO_BANKS_KEY = 'back_to_banks';
 export const RETRY_SAVE_DATA_KEY = 'retry_save_data';
+export const SELECT_PRIVATBANK_KEY = 'select_privatbank';
+export const SELECT_MONOBANK_KEY = 'select_monobank';
 
 /**
  * Generate welcome message with course list
@@ -14,7 +18,7 @@ export function generateWelcomeMessage(courses: Course[]): FormattedString {
     const generateCourse = (course: Course, idx: number) => {
         const courseTime = `${formatCourseDate(course.start_date)} — ${formatCourseDate(course.end_date)}`;
         return FormattedString.join([
-            fmt`${idx + 1}. ${course.name}\n\n`,
+            fmt`${b}${idx + 1}. ${course.name}${b}\n\n`,
             `${localizationService.t('welcome.courseTime')}: ${courseTime}\n`,
             `${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}\n\n`,
         ]);
@@ -71,24 +75,75 @@ export function generateCourseDetailKeyboard(courseId: number) {
  * Generate back to course keyboard
  */
 export function generateBackToCourseKeyboard(courseId: number) {
-    return [[{ text: '← Back to course', callback_data: `course_${courseId}` }]];
+    return [[{ text: localizationService.t('buttons.backToCourse'), callback_data: `course_${courseId}` }]];
 }
 
 /**
- * Generate success message after data is saved
+ * Generate bank selection message
  */
-export function generateSuccessMessage(paymentLink: string): string {
-    return (
-        '✅ Your information has been saved successfully!\n\n' +
-        '💳 Follow the link to pay and save the receipt. You will need to confirm your purchase:\n\n' +
-        `${paymentLink}\n\n` +
-        'Thank you for choosing Tellers Agency Academy!'
-    );
+export function generateBankSelectionMessage(): FormattedString {
+    return FormattedString.join([
+        fmt`${b}${localizationService.t('payment.bankSelection.title')}${b}\n\n`,
+        fmt`${localizationService.t('payment.bankSelection.description')}\n\n`,
+    ]);
+}
+
+/**
+ * Generate bank selection keyboard
+ */
+export function generateBankSelectionKeyboard(courseId: number) {
+    return [
+        [
+            { text: localizationService.t('payment.privatbank'), callback_data: SELECT_PRIVATBANK_KEY },
+            { text: localizationService.t('payment.monobank'), callback_data: SELECT_MONOBANK_KEY },
+        ],
+        [{ text: localizationService.t('buttons.backToCourse'), callback_data: `course_${courseId}` }],
+    ];
+}
+
+/**
+ * Generate bank-specific payment message
+ */
+export function generateBankPaymentMessage(bank: 'privatbank' | 'monobank', course: Course): FormattedString {
+    const paymentLink = bank === 'privatbank' ? course.payment_link_privatbank : course.payment_link_monobank;
+    
+    return FormattedString.join([
+        fmt`${b}${localizationService.t(`payment.bankDetails.${bank}.title`)}${b}\n\n`,
+        fmt`${b}${course.name}${b}\n`,
+        fmt`${b}${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}${b}\n\n`,
+        fmt`${localizationService.t(`payment.bankDetails.${bank}.instructions`)}\n\n`,
+        fmt`${a(paymentLink)}💳 ${localizationService.t('payment.choosePaymentMethod')}${a}\n\n`,
+        fmt`${localizationService.t('payment.thankYou')}\n\n`,
+    ]);
+}
+
+/**
+ * Generate success message after data is saved (deprecated - kept for backward compatibility)
+ */
+export function generateSuccessMessage(paymentLinks: {
+    privatbankLink: string;
+    monobankLink: string;
+}): FormattedString {
+    return FormattedString.join([
+        fmt`${b}${localizationService.t('payment.title')}${b}\n\n`,
+        fmt`${localizationService.t('payment.choosePaymentMethod')}\n\n`,
+        fmt`${a(paymentLinks.privatbankLink)}${localizationService.t('payment.privatbank')}${a}    ${a(
+            paymentLinks.monobankLink,
+        )}${localizationService.t('payment.monobank')}${a}\n\n`,
+        fmt`${localizationService.t('payment.paymentDetails')}\n\n`,
+        fmt`${localizationService.t('payment.thankYou')}\n\n`,
+    ]);
 }
 
 /**
  * Generate back to courses keyboard for final message
  */
 export function generateFinalKeyboard() {
-    return [[{ text: '🏠 Back to courses', callback_data: 'back_to_courses' }]];
+    return [
+        [{ text: localizationService.t('buttons.backToBanks'), callback_data: BACK_TO_BANKS_KEY }],
+        [{ text: localizationService.t('buttons.backToHome'), callback_data: BACK_TO_COURSES_KEY }],
+        ...(config.telegram.supportUrl
+            ? [[{ text: localizationService.t('buttons.contactSupport'), url: config.telegram.supportUrl }]]
+            : []),
+    ];
 }

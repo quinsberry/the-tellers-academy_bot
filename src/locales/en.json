@@ -24,6 +24,7 @@
     "buyCourse": "💳 Buy the course",
     "backToCourses": "← Back to courses",
     "backToCourse": "← Back to course",
+    "backToBanks": "← Back to banks",
     "backToHome": "🏠 Back to courses",
     "tryAgain": "🔄 Try Again",
     "contactSupport": "📞 Contact Support"
@@ -56,6 +57,28 @@
       "invalidCharacters": "❌ Please enter a valid work position using letters, numbers, and common punctuation:",
       "suspicious": "❌ Please enter a real work position:",
       "noLetters": "❌ Please enter a valid work position that contains letters:"
+    }
+  },
+  "payment": {
+    "title": "Thank you for the information! Last step remaining.",
+    "choosePaymentMethod": "Choose a convenient payment method:",
+    "privatbank": "PrivatBank",
+    "monobank": "Monobank",
+    "paymentDetails": "After payment, we will contact you within a business day for confirmation and next steps.",
+    "thankYou": "Thank you for choosing us!",
+    "bankSelection": {
+      "title": "Choose a bank for payment",
+      "description": "Select the bank that is convenient for you to get payment details:"
+    },
+    "bankDetails": {
+      "privatbank": {
+        "title": "💳 Payment via PrivatBank",
+        "instructions": "To pay via PrivatBank:\n\n1️⃣ Scan the QR code below or follow the link\n2️⃣ Make a transfer for the specified amount\n3️⃣ Save the payment receipt\n\nAfter payment, we will contact you within a business day for confirmation and next steps."
+      },
+      "monobank": {
+        "title": "💳 Payment via Monobank",
+        "instructions": "To pay via Monobank:\n\n1️⃣ Scan the QR code below or follow the link\n2️⃣ Make a transfer for the specified amount\n3️⃣ Save the payment receipt\n\nAfter payment, we will contact you within a business day for confirmation and next steps."
+      }
     }
   },
   "success": {

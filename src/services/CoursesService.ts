@@ -28,8 +28,18 @@ export interface Course {
     currency_symbol: string;
     start_date: string;
     end_date: string;
-    image: string;
-    payment_link: string;
+    payment: {
+        privatbank: {
+            link: string;
+            qr_code: string;
+        };
+        monobank: {
+            link: string;
+            qr_code: string;
+        };
+    };
+    payment_link_privatbank: string;
+    payment_link_monobank: string;
 }
 
 export interface CoursesData {

@@ -1,6 +1,7 @@
 import { BotContext } from '../types';
 import { logError, logWarn } from './logger';
 import { config } from '../config';
+import { localizationService } from '@/services/LocalizationService';
 
 /**
  * Handle user-facing errors with appropriate messages
@@ -8,7 +9,7 @@ import { config } from '../config';
 export async function handleUserError(
     ctx: BotContext,
     error: Error,
-    userMessage: string = '❌ Something went wrong. Please try again.',
+    userMessage: string = localizationService.t('errors.general.somethingWrong'),
     context?: Record<string, any>,
 ): Promise<void> {
     logError('User error occurred', error, {
@@ -21,10 +22,10 @@ export async function handleUserError(
         await ctx.reply(userMessage, {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: '🔄 Try Again', callback_data: 'retry_last_action' }],
-                    [{ text: '🏠 Back to Home', callback_data: 'back_to_courses' }],
+                    [{ text: localizationService.t('buttons.tryAgain'), callback_data: 'retry_last_action' }],
+                    [{ text: localizationService.t('buttons.backToHome'), callback_data: 'back_to_courses' }],
                     ...(config.telegram.supportUrl
-                        ? [[{ text: '📞 Contact Support', url: config.telegram.supportUrl }]]
+                        ? [[{ text: localizationService.t('buttons.contactSupport'), url: config.telegram.supportUrl }]]
                         : []),
                 ],
             },

@@ -42,8 +42,18 @@
             "currency_symbol": "₴",
             "start_date": "2025-09-16",
             "end_date": "2025-09-20",
-            "image": "https://via.placeholder.com/150",
-            "payment_link": "https://tinyurl.com/4ct4wybz"
+            "payment:": {
+                "privatbank": {
+                    "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMjcwMC4wCjM1MzQxMDE4MDEKCgqz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",
+                    "qr_code": "./images/privat_intensiv_qr.png"
+                },
+                "monobank": {
+                    "link": "https://surl.li/ccdjip",
+                    "qr_code": "https://surl.li/ccdjip"
+                }
+            },
+            "payment_link_privatbank": "https://surli.cc/rdfpsi",
+            "payment_link_monobank": "https://surl.li/ccdjip"
         },
         {
             "id": 2,
@@ -80,8 +90,18 @@
             "currency_symbol": "₴",
             "start_date": "2025-09-26",
             "end_date": "2025-09-28",
-            "image": "https://via.placeholder.com/150",
-            "payment_link": "https://tinyurl.com/4ct4wybz"
+            "payment:": {
+                "privatbank": {
+                    "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMzUwMC4wCjM1MzQxMDE4MDEKCgqz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",
+                    "qr_code": "./images/privat_master-class_qr.png"
+                },
+                "monobank": {
+                    "link": "https://surl.li/ccdjip",
+                    "qr_code": "https://surl.li/ccdjip"
+                }
+            },
+            "payment_link_privatbank": "https://surl.li/kgdeqz",
+            "payment_link_monobank": "https://surl.li/vrospx"
         }
     ]
 }

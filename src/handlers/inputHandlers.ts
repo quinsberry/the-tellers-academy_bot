@@ -5,6 +5,8 @@ import { handleUserError, withRetry } from '../utils/errorHandler';
 import { sanitizeUserInput } from '../utils/security';
 import {
     generateBackToCourseKeyboard,
+    generateBankSelectionMessage,
+    generateBankSelectionKeyboard,
     generateSuccessMessage,
     generateFinalKeyboard,
     BACK_TO_COURSES_KEY,
@@ -12,6 +14,7 @@ import {
 import { coursesService } from '@/services/CoursesService';
 import { sheetsService, UserData } from '@/services/SheetsService';
 import { getCurrentTimestamp } from '../utils/formatDates';
+import { localizationService } from '@/services/LocalizationService';
 
 /**
  * Handle email input with validation
@@ -31,11 +34,11 @@ export async function handleEmailInput(ctx: BotContext, email: string): Promise<
     }
 
     ctx.session.email = validation.value!;
-    ctx.session.step = 'entering_name';
+    ctx.session.step = 'entering_position';
 
     const keyboard = generateBackToCourseKeyboard(ctx.session.selectedCourseId!);
 
-    await ctx.reply('👤 Please enter your full name:', {
+    await ctx.reply(localizationService.t('form.enterPosition'), {
         reply_markup: {
             inline_keyboard: keyboard,
         },
@@ -56,11 +59,11 @@ export async function handleNameInput(ctx: BotContext, name: string): Promise<vo
     }
 
     ctx.session.name = validation.value!;
-    ctx.session.step = 'entering_position';
+    ctx.session.step = 'entering_email';
 
     const keyboard = generateBackToCourseKeyboard(ctx.session.selectedCourseId!);
 
-    await ctx.reply('💼 Please enter your work position:', {
+    await ctx.reply(localizationService.t('form.enterEmail'), {
         reply_markup: {
             inline_keyboard: keyboard,
         },
@@ -81,7 +84,7 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
     }
 
     ctx.session.workPosition = validation.value!;
-    ctx.session.step = 'completed';
+    ctx.session.step = 'selecting_bank';
 
     // Save data to Google Sheets
     try {
@@ -102,34 +105,24 @@ export async function handlePositionInput(ctx: BotContext, position: string): Pr
 
         await withRetry(() => sheetsService.saveUserData(userData), 2, 1000);
 
-        // Show success message with payment link
-        const successMessage = generateSuccessMessage(course.payment_link);
-        const keyboard = generateFinalKeyboard();
+        // Show bank selection message
+        const bankSelectionMessage = generateBankSelectionMessage();
+        const keyboard = generateBankSelectionKeyboard(ctx.session.selectedCourseId!);
 
-        await ctx.reply(successMessage, {
+        await ctx.reply(bankSelectionMessage.text, {
+            entities: bankSelectionMessage.entities,
             reply_markup: {
                 inline_keyboard: keyboard,
             },
-            link_preview_options: {
-                is_disabled: true,
-            },
         });
 
-        // Reset session
-        ctx.session = { step: 'start' };
     } catch (error) {
-        await handleUserError(
-            ctx,
-            error as Error,
-            '❌ Sorry, there was an error saving your information to our system.\n\n' +
-                "Don't worry, your data is still here! You can try again.",
-            {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-                courseId: ctx.session.selectedCourseId,
-                operation: 'save_user_data',
-            },
-        );
+        await handleUserError(ctx, error as Error, localizationService.t('errors.dataSaving.failed'), {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+            courseId: ctx.session.selectedCourseId,
+            operation: 'save_user_data',
+        });
     }
 }
 
@@ -147,9 +140,11 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
                 username: ctx.from?.username,
             });
         }
-        await ctx.editMessageText('❌ Session data is incomplete. Please start over.', {
+        await ctx.editMessageText(localizationService.t('errors.dataSaving.incomplete'), {
             reply_markup: {
-                inline_keyboard: [[{ text: '🏠 Back to courses', callback_data: BACK_TO_COURSES_KEY }]],
+                inline_keyboard: [
+                    [{ text: localizationService.t('buttons.backToCourses'), callback_data: BACK_TO_COURSES_KEY }],
+                ],
             },
         });
         return;
@@ -163,7 +158,7 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
             username: ctx.from?.username,
         });
     }
-    await ctx.editMessageText('🔄 Retrying to save your information...');
+    await ctx.editMessageText(localizationService.t('errors.dataSaving.retrying'));
 
     // Retry the save operation
     try {
@@ -184,34 +179,24 @@ export async function handleRetrySaveData(ctx: BotContext): Promise<void> {
 
         await withRetry(() => sheetsService.saveUserData(userData), 2, 1000);
 
-        // Show success message with payment link
-        const successMessage = generateSuccessMessage(course.payment_link);
-        const keyboard = generateFinalKeyboard();
+        // Show bank selection message
+        ctx.session.step = 'selecting_bank';
+        const bankSelectionMessage = generateBankSelectionMessage();
+        const keyboard = generateBankSelectionKeyboard(ctx.session.selectedCourseId);
 
-        await ctx.editMessageText(successMessage, {
+        await ctx.editMessageText(bankSelectionMessage.text, {
+            entities: bankSelectionMessage.entities,
             reply_markup: {
                 inline_keyboard: keyboard,
             },
-            link_preview_options: {
-                is_disabled: true,
-            },
         });
-
-        // Reset session
-        ctx.session = { step: 'start' };
     } catch (error) {
-        await handleUserError(
-            ctx,
-            error as Error,
-            '❌ Still having trouble saving your information.\n\n' +
-                'This might be a temporary issue with our system. Please try again in a few minutes.',
-            {
-                userId: ctx.from?.id,
-                username: ctx.from?.username,
-                courseId: ctx.session.selectedCourseId,
-                operation: 'retry_save_user_data',
-            },
-        );
+        await handleUserError(ctx, error as Error, localizationService.t('errors.dataSaving.stillTrouble'), {
+            userId: ctx.from?.id,
+            username: ctx.from?.username,
+            courseId: ctx.session.selectedCourseId,
+            operation: 'retry_save_user_data',
+        });
     }
 }
 
@@ -236,6 +221,6 @@ export async function handleTextMessage(ctx: BotContext): Promise<void> {
             await handlePositionInput(ctx, text);
             break;
         default:
-            await ctx.reply('Please use /start to begin or select an option from the menu.');
+            await ctx.reply(localizationService.t('errors.general.useStart'));
     }
 }

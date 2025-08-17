@@ -1,6 +1,7 @@
 import { BotContext } from '../types';
 import { showWelcomeAndCourses } from './courseHandlers';
 import { handleUserError } from '../utils/errorHandler';
+import { localizationService } from '@/services/LocalizationService';
 
 /**
  * Handle /start command
@@ -9,7 +10,7 @@ export async function handleStart(ctx: BotContext): Promise<void> {
     try {
         await showWelcomeAndCourses(ctx);
     } catch (error) {
-        await handleUserError(ctx, error as Error, 'Sorry, there was an error starting the bot. Please try again.', {
+        await handleUserError(ctx, error as Error, localizationService.t('errors.general.startBot'), {
             userId: ctx.from?.id,
             username: ctx.from?.username,
             operation: 'start_command',
@@ -29,7 +30,7 @@ export async function handleHelp(ctx: BotContext): Promise<void> {
                 'Simply select a course to view details and purchase!',
         );
     } catch (error) {
-        await handleUserError(ctx, error as Error, 'Sorry, there was an error showing help. Please try again.', {
+        await handleUserError(ctx, error as Error, localizationService.t('errors.general.showHelp'), {
             userId: ctx.from?.id,
             username: ctx.from?.username,
             operation: 'help_command',

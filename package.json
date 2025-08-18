@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias && npm run copy-assets",
+    "build:clean": "rm -rf build && npm run build",
+    "copy-assets": "copyfiles -u 1 \"src/**/*.json\" \"src/**/*.png\" \"src/**/*.jpg\" \"src/**/*.jpeg\" \"src/**/*.gif\" build",
     "start": "node build/index.js",
     "dev": "tsx watch src/index.ts",
     "type-check": "tsc --noEmit",
@@ -20,10 +22,13 @@
     "google-spreadsheet": "^5.0.2",
     "grammy": "^1.37.0",
     "pino": "^9.9.0",
-    "pino-pretty": "^13.1.1"
+    "pino-pretty": "^13.1.1",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",
+    "copyfiles": "^2.4.1",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2"
   }

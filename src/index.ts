@@ -1,5 +1,8 @@
-import { bot } from '@/bot';
-import { config, validateConfigEnv } from '@/config';
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { config } from '@/config';
+import { TBot, createBot } from '@/bot';
 import { coursesService } from '@/services/CoursesService';
 import { localizationService } from '@/services/LocalizationService';
 import { sheetsService } from '@/services/SheetsService';
@@ -9,7 +12,12 @@ async function main() {
     console.log('🤖 Starting Telegram Course Bot...\n');
 
     try {
-        validateConfigEnv();
+        const bot: TBot = createBot();
+
+        onShutdown(async () => {
+            logger.info('Shutdown');
+            await bot.stop();
+        });
 
         // Initialize services first
         console.log('🔧 Initializing services...');
@@ -25,20 +33,18 @@ async function main() {
     }
 }
 
-// Handle graceful shutdown
-process.once('SIGINT', () => {
-    logger.info('Received SIGINT, shutting down gracefully');
-    bot.stop();
-    process.exit(0);
-});
-
-process.once('SIGTERM', () => {
-    logger.info('Received SIGTERM, shutting down gracefully');
-    bot.stop();
-    process.exit(0);
-});
-
 main().catch((error) => {
     logger.error(error as Error, 'Unhandled error');
     process.exit(1);
 });
+
+function onShutdown(cleanUp: () => Promise<void>) {
+    let isShuttingDown = false;
+    const handleShutdown = async () => {
+        if (isShuttingDown) return;
+        isShuttingDown = true;
+        await cleanUp();
+    };
+    process.on('SIGINT', handleShutdown);
+    process.on('SIGTERM', handleShutdown);
+}

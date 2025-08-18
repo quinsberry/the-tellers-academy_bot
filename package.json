@@ -7,8 +7,8 @@
     "build": "tsc && tsc-alias && tsc-esm-fix --target='build' && npm run copy-assets",
     "build:clean": "rm -rf build && npm run build",
     "copy-assets": "copyfiles -u 1 \"src/**/*.json\" \"src/**/*.png\" \"src/**/*.jpg\" \"src/**/*.jpeg\" \"src/**/*.gif\" build",
-    "start": "node --env-file=.env build/index.js",
-    "dev": "tsx watch --env-file=.env src/index.ts",
+    "start": "node build/index.js",
+    "dev": "tsx watch src/index.ts",
     "type-check": "tsc --noEmit",
     "validate": "npm run type-check"
   },
@@ -21,6 +21,7 @@
   "description": "",
   "dependencies": {
     "@grammyjs/parse-mode": "^2.2.0",
+    "dotenv": "^17.2.1",
     "google-auth-library": "^10.2.1",
     "google-spreadsheet": "^5.0.2",
     "grammy": "^1.37.0",

@@ -1,6 +1,8 @@
 function getRequiredEnv(key: string): string {
     const value = process.env[key];
     if (!value) {
+        console.error(`❌ Missing required environment variable: ${key}`);
+        console.error(`📋 Available env vars: ${Object.keys(process.env).filter(k => k.startsWith('TELEGRAM') || k.startsWith('GOOGLE')).join(', ')}`);
         throw new Error(`Missing required environment variable: ${key}`);
     }
     return value;

@@ -1,5 +1,9 @@
 import dotenv from 'dotenv';
-dotenv.config();
+
+// Only load .env in development (Railway provides env vars directly)
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
 
 import { config } from '@/config';
 import { TBot, createBot } from '@/bot';

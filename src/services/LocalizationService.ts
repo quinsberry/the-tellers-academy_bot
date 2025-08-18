@@ -3,6 +3,7 @@ import path from 'node:path';
 import { BotContext } from '../types';
 import { config } from '@/config';
 import { logger } from '@/utils/logger';
+import { getSrcDir } from '@/utils/paths';
 
 // Supported languages
 export type SupportedLanguage = 'en' | 'ua';
@@ -47,7 +48,7 @@ export class LocalizationService {
         }
 
         try {
-            const filePath = path.join(__dirname, '..', 'locales', `${language}.json`);
+            const filePath = path.join(getSrcDir(), 'locales', `${language}.json`);
             const content = fs.readFileSync(filePath, 'utf-8');
             const translation = JSON.parse(content);
 

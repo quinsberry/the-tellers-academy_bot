@@ -1,9 +1,10 @@
 {
   "name": "the-tellers-agency-courses-bot",
   "version": "1.0.0",
+  "type": "module",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc && tsc-alias && npm run copy-assets",
+    "build": "tsc && tsc-alias && tsc-esm-fix --target='build' && npm run copy-assets",
     "build:clean": "rm -rf build && npm run build",
     "copy-assets": "copyfiles -u 1 \"src/**/*.json\" \"src/**/*.png\" \"src/**/*.jpg\" \"src/**/*.jpeg\" \"src/**/*.gif\" build",
     "start": "node build/index.js",
@@ -29,6 +30,7 @@
     "@types/node": "^24.2.1",
     "copyfiles": "^2.4.1",
     "tsc-alias": "^1.8.16",
+    "tsc-esm-fix": "^3.1.2",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2"
   }

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { handleSystemError } from '../utils/errorHandler';
+import { getSrcDir } from '@/utils/paths';
 
 export interface Author {
     name: string;
@@ -77,13 +78,13 @@ export class CoursesService {
 
     private loadCourses(): CoursesData {
         try {
-            const coursesPath = path.join(__dirname, '..', 'data.json');
+            const coursesPath = path.join(getSrcDir(), 'data.json');
             const coursesFile = fs.readFileSync(coursesPath, 'utf-8');
             return JSON.parse(coursesFile);
         } catch (error) {
             handleSystemError(error as Error, {
                 operation: 'load_courses_file',
-                coursesPath: path.join(__dirname, '..', 'data.json'),
+                coursesPath: path.join(getSrcDir(), 'data.json'),
             });
             throw error;
         }

@@ -6,6 +6,7 @@ import { InputFile } from 'grammy';
 import path from 'node:path';
 import fs from 'node:fs';
 import { safeAnswerCallbackQuery, handleCallbackWithExpiration } from '../utils/callbackHelpers';
+import { getSrcDir } from '@/utils/paths';
 import {
     generateWelcomeMessage,
     generateCourseKeyboard,
@@ -193,7 +194,7 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
         if (qrCodePath && qrCodePath.startsWith('./images/')) {
             // Resolve the QR code file path (remove the ./ prefix and build from src directory)
             const cleanPath = qrCodePath.replace('./', '');
-            const fullQrPath = path.join(__dirname, '..', cleanPath);
+            const fullQrPath = path.join(getSrcDir(), cleanPath);
 
             // Check if QR code file exists
             if (fs.existsSync(fullQrPath)) {

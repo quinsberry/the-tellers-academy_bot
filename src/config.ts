@@ -11,7 +11,7 @@ export const config = {
         spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID!,
         spreadsheeTabName: process.env.GOOGLE_SPREADSHEET_TAB_NAME!,
         serviceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
-        privateKey: process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        privateKey: process.env.GOOGLE_PRIVATE_KEY!,
     },
     app: {
         maxRequestsPerMinutePerUser: 100,

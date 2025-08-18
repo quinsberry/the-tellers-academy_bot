@@ -125,9 +125,9 @@ export class SheetsService {
                 username: userData.telegramUsername,
                 email: userData.email,
                 name: userData.name,
-            }), 'User data saved successfully');
+            }), `User (@${userData.telegramUsername}) data saved successfully`);
         } catch (error) {
-            logger.error(error as Error, 'Error saving user data to Google Sheets');
+            logger.error(error as Error, `Error saving user (@${userData.telegramUsername}) data to Google Sheets`);
             throw error;
         }
     }

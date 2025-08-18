@@ -1,7 +1,3 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 export const config = {
     telegram: {
         botToken: process.env.TELEGRAM_BOT_TOKEN!,

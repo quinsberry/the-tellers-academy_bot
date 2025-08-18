@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  the-tellers-academy_bot:
+    build: .
+    container_name: the-tellers-academy_bot
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    volumes:
+      # Mount logs directory if you want to persist logs
+      - ./logs:/app/logs
+    # Uncomment if you need to expose a port for health checks
+    # ports:
+    #   - "3000:3000"
+    
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('Health check passed')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

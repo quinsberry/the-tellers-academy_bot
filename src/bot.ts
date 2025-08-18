@@ -73,7 +73,7 @@ bot.command('help', handleHelp);
 
 // Callback query handlers
 bot.callbackQuery(/^course_(\d+)$/, async (ctx) => {
-    const courseId = parseInt(ctx.match[1]);
+    const courseId = parseInt(ctx.match[1] ?? '0');
     await handleCourseSelection(ctx, courseId);
 });
 

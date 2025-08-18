@@ -3,8 +3,8 @@ import { coursesService } from '@/services/CoursesService';
 import { logger } from '@/utils/logger';
 import { handleUserError } from '../utils/errorHandler';
 import { InputFile } from 'grammy';
-import * as path from 'path';
-import * as fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import { safeAnswerCallbackQuery, handleCallbackWithExpiration } from '../utils/callbackHelpers';
 import {
     generateWelcomeMessage,
@@ -326,7 +326,7 @@ export async function handleBackToBanks(ctx: BotContext): Promise<void> {
         }
 
         ctx.session.step = 'selecting_bank';
-        ctx.session.selectedBank = undefined;
+        ctx.session.selectedBank = null;
 
         const bankSelectionMessage = generateBankSelectionMessage();
         const keyboard = generateBankSelectionKeyboard(ctx.session.selectedCourseId);

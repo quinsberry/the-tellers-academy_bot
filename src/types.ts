@@ -7,7 +7,7 @@ export interface UserSession {
     email?: string;
     name?: string;
     workPosition?: string;
-    selectedBank?: 'privatbank' | 'monobank';
+    selectedBank?: 'privatbank' | 'monobank' | null;
     sessionToken?: string;
     createdAt?: string;
     language?: SupportedLanguage;

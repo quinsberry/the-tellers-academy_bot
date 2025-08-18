@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { BotContext } from '../types';
 import { config } from '@/config';
 import { logger } from '@/utils/logger';

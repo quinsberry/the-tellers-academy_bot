@@ -1,10 +1,10 @@
 {
   "name": "the-tellers-agency-courses-bot",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "build/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node build/index.js",
     "dev": "tsx watch src/index.ts",
     "type-check": "tsc --noEmit",
     "validate": "npm run type-check"

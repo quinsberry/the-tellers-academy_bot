@@ -31,7 +31,7 @@ export function validateEmail(email: string): ValidationResult {
 
     // Check for common domain typos
     const domain = trimmedEmail.split('@')[1]?.toLowerCase();
-    const typoSuggestion = checkEmailDomainTypos(trimmedEmail, domain);
+    const typoSuggestion = checkEmailDomainTypos(trimmedEmail, domain ?? '');
     if (typoSuggestion) {
         return { isValid: false, error: typoSuggestion };
     }

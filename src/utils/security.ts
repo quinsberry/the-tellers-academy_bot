@@ -81,7 +81,7 @@ export function maskSensitiveData(data: Record<string, any>): Record<string, any
     // Mask email
     if (masked.email && typeof masked.email === 'string') {
         const [local, domain] = masked.email.split('@');
-        masked.email = `${local.substring(0, 2)}***@${domain}`;
+        masked.email = `${local?.substring(0, 2)}***@${domain}`;
     }
 
     // Mask name

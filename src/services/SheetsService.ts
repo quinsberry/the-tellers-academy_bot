@@ -33,7 +33,7 @@ export class SheetsService {
         if (this.doc) return;
 
         try {
-            console.log('🔍 Initializing Google Sheets connection...');
+            logger.info('🔍 Initializing Google Sheets connection...');
 
             const jwt = new JWT({
                 email: config.googleSheets.serviceAccountEmail,
@@ -70,10 +70,16 @@ export class SheetsService {
                 );
             } else {
             }
-            console.log('✅ Google Sheets initialized');
-            console.log('📊 Spreadsheet ID:', config.googleSheets.spreadsheetId);
-            console.log('📋 Sheet name:', config.googleSheets.spreadsheeTabName);
-            console.log('✅ Spreadsheet loaded:', this.doc.title);
+            logger.info('✅ Google Sheets initialized');
+            logger.info(
+                {
+                    'Spreadsheet ID': config.googleSheets.spreadsheetId,
+                    'Sheet name': config.googleSheets.spreadsheeTabName,
+                    'Spreadsheet title': this.doc.title,
+                },
+                '📊 Google Sheets info',
+            );
+            logger.info('✅ Spreadsheet loaded');
         } catch (error) {
             handleSystemError(error as Error, {
                 operation: 'sheets_initialization',
@@ -98,13 +104,16 @@ export class SheetsService {
                 );
             }
 
-            logger.info(maskSensitiveData({
-                username: userData.telegramUsername,
-                email: userData.email,
-                name: userData.name,
-                courseId: userData.courseId,
-                courseName: userData.courseName,
-            }), 'Saving user data');
+            logger.info(
+                maskSensitiveData({
+                    username: userData.telegramUsername,
+                    email: userData.email,
+                    name: userData.name,
+                    courseId: userData.courseId,
+                    courseName: userData.courseName,
+                }),
+                'Saving user data',
+            );
 
             await withRetry(
                 () =>
@@ -121,11 +130,14 @@ export class SheetsService {
                 1000,
             );
 
-            logger.info(maskSensitiveData({ 
-                username: userData.telegramUsername,
-                email: userData.email,
-                name: userData.name,
-            }), `User (@${userData.telegramUsername}) data saved successfully`);
+            logger.info(
+                maskSensitiveData({
+                    username: userData.telegramUsername,
+                    email: userData.email,
+                    name: userData.name,
+                }),
+                `User (@${userData.telegramUsername}) data saved successfully`,
+            );
         } catch (error) {
             logger.error(error as Error, `Error saving user (@${userData.telegramUsername}) data to Google Sheets`);
             throw error;

@@ -55,11 +55,6 @@ export function handleSystemError(error: Error, context?: Record<string, any>): 
         },
         'System error occurred',
     );
-
-    // In production, you might want to send alerts to monitoring service
-    if (config.app.nodeEnv === 'production') {
-        // TODO: Integrate with monitoring service (Sentry, DataDog, etc.)
-    }
 }
 
 /**

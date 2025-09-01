@@ -2,7 +2,11 @@ function getRequiredEnv(key: string): string {
     const value = process.env[key];
     if (!value) {
         console.error(`❌ Missing required environment variable: ${key}`);
-        console.error(`📋 Available env vars: ${Object.keys(process.env).filter(k => k.startsWith('TELEGRAM') || k.startsWith('GOOGLE')).join(', ')}`);
+        console.error(
+            `📋 Available env vars: ${Object.keys(process.env)
+                .filter((k) => k.startsWith('TELEGRAM') || k.startsWith('GOOGLE') || k.startsWith('AXIOM'))
+                .join(', ')}`,
+        );
         throw new Error(`Missing required environment variable: ${key}`);
     }
     return value;
@@ -30,6 +34,12 @@ export const config = {
             nodeEnv: process.env.NODE_ENV || 'development',
             port: parseInt(process.env.PORT || '3000', 10),
             timezone: process.env.APP_TIMEZONE || 'Europe/Kiev',
+        };
+    },
+    get logger() {
+        return {
+            AXIOM_DATASET: getRequiredEnv('AXIOM_DATASET'),
+            AXIOM_TOKEN: getRequiredEnv('AXIOM_TOKEN'),
         };
     },
 };

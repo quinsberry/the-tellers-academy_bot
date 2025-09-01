@@ -13,7 +13,7 @@ import { sheetsService } from '@/services/SheetsService';
 import { logger } from '@/utils/logger';
 
 async function main() {
-    console.log('🤖 Starting Telegram Course Bot...\n');
+    logger.info('🤖 Starting Telegram Course Bot...\n');
 
     try {
         const bot: TBot = createBot();
@@ -24,13 +24,13 @@ async function main() {
         });
 
         // Initialize services first
-        console.log('🔧 Initializing services...');
+        logger.info('🔧 Initializing services...');
         await Promise.all([sheetsService.init(), coursesService.init(), localizationService.init()]);
-        console.log('✅ All services initialized\n');
+        logger.info('✅ All services initialized\n');
 
         // Start the bot
         await bot.start();
-        console.log(`🎉 Bot started successfully in ${config.app.nodeEnv} mode`);
+        logger.info(`🎉 Bot started successfully in ${config.app.nodeEnv} mode`);
     } catch (error) {
         logger.error(error as Error, 'Failed to start application');
         process.exit(1);

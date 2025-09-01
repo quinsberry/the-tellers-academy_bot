@@ -36,7 +36,7 @@ export class LocalizationService {
         Object.keys(LANGUAGE_NAMES).forEach((lang) => {
             this.loadTranslation(lang as SupportedLanguage);
         });
-        console.log(`✅ Translations loaded for languages: ${Object.keys(LANGUAGE_NAMES).join(', ')}`);
+        logger.info(`✅ Translations loaded for languages: ${Object.keys(LANGUAGE_NAMES).join(', ')}`);
     }
 
     /**

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { handleSystemError } from '../utils/errorHandler';
 import { getSrcDir } from '@/utils/paths';
+import { logger } from '@/utils/logger';
 
 export interface Author {
     name: string;
@@ -55,7 +56,7 @@ export class CoursesService {
     async init(): Promise<void> {
         try {
             this.coursesData = this.loadCourses();
-            console.log('✅ Courses initialized');
+            logger.info('✅ Courses initialized');
         } catch (error) {
             handleSystemError(error as Error, {
                 operation: 'courses_initialization',

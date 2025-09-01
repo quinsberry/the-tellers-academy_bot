@@ -76,11 +76,6 @@ export function validateName(name: string): ValidationResult {
         return { isValid: false, error: localizationService.t('validation.name.invalidPartLength') };
     }
 
-    // Check for suspicious patterns
-    if (/(.)\1{4,}/.test(trimmedName)) {
-        return { isValid: false, error: localizationService.t('validation.name.suspicious') };
-    }
-
     // Capitalize properly
     const capitalizedName = nameParts
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
@@ -104,19 +99,8 @@ export function validateWorkPosition(position: string): ValidationResult {
     }
 
     // Check maximum length
-    if (trimmedPosition.length > 100) {
+    if (trimmedPosition.length > 255) {
         return { isValid: false, error: localizationService.t('validation.position.tooLong') };
-    }
-
-    // Check for valid characters
-    const positionRegex = /^[a-zA-ZÀ-ÿĀ-žА-я0-9\s\-\.\,\&\/\(\)]+$/;
-    if (!positionRegex.test(trimmedPosition)) {
-        return { isValid: false, error: localizationService.t('validation.position.invalidCharacters') };
-    }
-
-    // Check for suspicious patterns
-    if (/(.)\1{4,}/.test(trimmedPosition)) {
-        return { isValid: false, error: localizationService.t('validation.position.suspicious') };
     }
 
     // Check that it contains letters
@@ -133,7 +117,7 @@ export function validateWorkPosition(position: string): ValidationResult {
 
     return {
         isValid: true,
-        value: capitalizedPosition,
+        value: trimmedPosition,
     };
 }
 

@@ -48,14 +48,11 @@
       "tooLong": "❌ Name is too long. Please enter a name with less than 100 characters:",
       "invalidCharacters": "❌ Please enter a valid name using only letters, spaces, hyphens, and apostrophes:",
       "missingFirstName": "❌ Please enter at least your first name:",
-      "invalidPartLength": "❌ Please enter a valid name (each part should be 1-50 characters):",
-      "suspicious": "❌ Please enter a real name:"
+      "invalidPartLength": "❌ Please enter a valid name (each part should be 1-50 characters):"
     },
     "position": {
       "tooShort": "❌ Please enter a valid work position (at least 2 characters):",
-      "tooLong": "❌ Work position is too long. Please enter a position with less than 100 characters:",
-      "invalidCharacters": "❌ Please enter a valid work position using letters, numbers, and common punctuation:",
-      "suspicious": "❌ Please enter a real work position:",
+      "tooLong": "❌ Work position is too long. Please enter a position with less than 255 characters:",
       "noLetters": "❌ Please enter a valid work position that contains letters:"
     }
   },

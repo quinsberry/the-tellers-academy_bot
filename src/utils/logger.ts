@@ -39,10 +39,7 @@ if (process.env.AXIOM_TOKEN && process.env.AXIOM_DATASET) {
 }
 export const logger = pino({
     level: 'info',
-    base: { env: config.app.nodeEnv },
-    transport: {
-        targets,
-    },
+    transport: { targets },
 });
 
 export type Logger = typeof logger;

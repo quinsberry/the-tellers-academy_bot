@@ -11,6 +11,7 @@ import {
     handlePrivatBankSelection,
     handleMonoBankSelection,
     handleBackToBanks,
+    showWelcomeAndCourses,
 } from './handlers/courseHandlers';
 import { handleTextMessage, handleRetrySaveData } from './handlers/inputHandlers';
 import {
@@ -40,9 +41,28 @@ export const createBot = (): Bot<BotContext> => {
             const ageMinutes = (Date.now() - messageDate * 1000) / (1000 * 60);
             if (ageMinutes > 120) {
                 // 2 hours
-                await safeAnswerCallbackQuery(ctx, localizationService.t('errors.expiredCallback'), {
-                    show_alert: true,
-                });
+                try {
+                    // Show expired callback message to user
+                    await safeAnswerCallbackQuery(ctx, localizationService.t('errors.expiredCallback'), {
+                        show_alert: true,
+                    });
+
+                    // Delete the message with expired buttons
+                    try {
+                        await ctx.deleteMessage();
+                    } catch (deleteError) {
+                        // If deletion fails, we'll still show the welcome screen
+                    }
+
+                    // Reset session and show welcome screen
+                    ctx.session = { step: 'start' };
+                    await showWelcomeAndCourses(ctx, false);
+                } catch (error) {
+                    // If anything fails, at least try to show the expired message
+                    await safeAnswerCallbackQuery(ctx, localizationService.t('errors.expiredCallback'), {
+                        show_alert: true,
+                    });
+                }
                 return; // Don't proceed to the actual handler
             }
         }

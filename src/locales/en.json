@@ -94,7 +94,8 @@
       "failed": "❌ Sorry, there was an error saving your information to our system.\n\nDon't worry, your data is still here! You can try again.",
       "stillTrouble": "❌ Still having trouble saving your information.\n\nThis might be a temporary issue with our system. Please try again in a few minutes."
     },
-    "rateLimited": "⚠️ Too many requests. Please wait a moment before trying again."
+    "rateLimited": "⚠️ Too many requests. Please wait a moment before trying again.",
+    "expiredCallback": "⏰ This button has expired. You need to start over."
   },
   "help": {
     "title": "📚 Tellers Agency Academy Help",

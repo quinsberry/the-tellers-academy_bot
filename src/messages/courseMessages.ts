@@ -19,8 +19,7 @@ export function generateWelcomeMessage(courses: Course[]): FormattedString {
         const courseTime = `${formatCourseDate(course.start_date)} — ${formatCourseDate(course.end_date)}`;
         return FormattedString.join([
             fmt`${b}${idx + 1}. ${course.name}${b}\n\n`,
-            `${localizationService.t('welcome.courseTime')}: ${courseTime}\n`,
-            `${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}\n\n`,
+            `${localizationService.t('welcome.courseTime')}: ${courseTime}\n\n`,
         ]);
     };
 
@@ -45,10 +44,18 @@ export function generateCourseDetails(course: Course): FormattedString {
         ]);
     };
 
+    const priceSection =
+        course.promotion && new Date(course.promotion.end_date) > new Date()
+            ? FormattedString.join([
+                  fmt`${b}${course.promotion.description}${b}\n`,
+                  fmt`${localizationService.t('labels.commonPrice')}: ${course.price}${course.currency_symbol}\n\n`,
+              ])
+            : fmt`${b}${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}${b}\n\n`;
+
     return FormattedString.join([
         fmt`${b}${course.details.title}${b}\n\n`,
         fmt`${course.details.description}\n\n`,
-        fmt`${b}${localizationService.t('labels.price')}: ${course.price}${course.currency_symbol}${b}\n\n`,
+        priceSection,
         fmt`${b}${localizationService.t('course.details.courseProgram')}${b}\n\n`,
         ...course.details.lectures.map(generateLecture),
     ]);
@@ -105,34 +112,45 @@ export function generateBankSelectionKeyboard(courseId: number) {
  * Generate bank-specific payment message
  */
 export function generateBankPaymentMessage(bank: 'privatbank' | 'monobank', course: Course): FormattedString {
+    let paymentDetails: FormattedString;
 
-    let paymentDetails: FormattedString
-    
+    const validPromotion =
+        course.promotion && new Date(course.promotion.end_date) > new Date() ? course.promotion : null;
+    const payment = validPromotion?.payment ?? course.payment;
+
     if (bank === 'privatbank') {
         paymentDetails = FormattedString.join([
-            fmt`${localizationService.t('payment.scanQROR')} ${a(course.payment.privatbank.link)}${localizationService.t('payment.followTheLink')}${a}\n\n`,
+            fmt`${localizationService.t('payment.scanQROR')} ${a(payment.privatbank.link)}${localizationService.t(
+                'payment.followTheLink',
+            )}${a}\n\n`,
         ]);
     } else if (bank === 'monobank') {
         paymentDetails = FormattedString.join([
             fmt`${b}${localizationService.t('payment.requisites.requisitesTitle')}:${b}\n`,
             fmt`(${localizationService.t('payment.requisites.copyInstructions')})\n\n`,
             fmt`${b}${localizationService.t('payment.requisites.iban')}${b}\n`,
-            fmt`${code}${course.payment.monobank.requisites.iban}${code}\n\n`,
+            fmt`${code}${payment.monobank.requisites.iban}${code}\n\n`,
             fmt`${b}${localizationService.t('payment.requisites.tax_id')}${b}\n`,
-            fmt`${code}${course.payment.monobank.requisites.tax_id}${code}\n\n`,
+            fmt`${code}${payment.monobank.requisites.tax_id}${code}\n\n`,
             fmt`${b}${localizationService.t('payment.requisites.recipient')}${b}\n`,
-            fmt`${code}${course.payment.monobank.requisites.recipient}${code}\n\n`,
+            fmt`${code}${payment.monobank.requisites.recipient}${code}\n\n`,
             fmt`${b}${localizationService.t('payment.requisites.description')}${b}\n`,
-            fmt`${code}${course.payment.monobank.requisites.description}${code}\n\n`,
+            fmt`${code}${payment.monobank.requisites.description}${code}\n\n`,
         ]);
     } else {
         throw new Error('Invalid bank');
     }
 
+    const priceSection = validPromotion
+        ? fmt`${b}${localizationService.t('labels.price')} ${validPromotion.name}:${b} ${validPromotion.price}${
+              course.currency_symbol
+          }\n\n`
+        : fmt`${b}${localizationService.t('labels.price')}:${b} ${course.price}${course.currency_symbol}\n\n`;
+
     return FormattedString.join([
         fmt`${b}${localizationService.t(`payment.bankDetails.${bank}.title`)}${b}\n\n`,
         fmt`${b}${course.name}${b}\n`,
-        fmt`${b}${localizationService.t('labels.price')}:${b} ${course.price}${course.currency_symbol}\n\n`,
+        priceSection,
         paymentDetails,
         fmt`${localizationService.t('payment.paymentDetails')}\n\n`,
         fmt`${localizationService.t('payment.thankYou')}\n\n`,

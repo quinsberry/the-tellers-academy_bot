@@ -189,7 +189,8 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
         const keyboard = generateFinalKeyboard();
 
         // Get QR code path from course data
-        const qrCodePath = course.payment?.privatbank?.qr_code;
+        const validPromotion = course.promotion && new Date(course.promotion.end_date) > new Date() ? course.promotion : null;
+        const qrCodePath = validPromotion?.payment?.privatbank?.qr_code ?? course.payment?.privatbank?.qr_code;
 
         if (qrCodePath && qrCodePath.startsWith('./images/')) {
             // Resolve the QR code file path (remove the ./ prefix and build from src directory)

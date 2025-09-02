@@ -1,124 +1,128 @@
 {
-  "welcome": {
-    "title": "🎓 *Welcome to the Tellers Agency Academy*",
-    "availableCourses": "📚 *Available Courses:*",
-    "selectCourse": "👇 *Select a course to view details:*",
-    "starts": "📅 Starts: *{date}*",
-    "price": "💰 {price} {currency}"
-  },
-  "course": {
-    "details": {
-      "title": "📖 {courseName}",
-      "description": "📝 {description}",
-      "authors": "👥 Authors: {authors}",
-      "startDate": "📅 Start Date: {date}",
-      "endDate": "📅 End Date: {date}",
-      "price": "💰 Price: {price} {currency}"
+    "welcome": {
+        "title": "🎓 *Welcome to the Tellers Agency Academy*",
+        "availableCourses": "📚 *Available Courses:*",
+        "selectCourse": "👇 *Select a course to view details:*",
+        "starts": "📅 Starts: *{date}*",
+        "price": "💰 {price} {currency}"
     },
-    "notFound": "Course not found",
-    "noCoursesAvailable": "Sorry, no courses are currently available. Please check back later!",
-    "errorLoading": "Sorry, there was an error loading the courses. Please try again later.",
-    "errorLoadingDetails": "Sorry, there was an error loading the course details. Please try again."
-  },
-  "buttons": {
-    "buyCourse": "💳 Buy the course",
-    "backToCourses": "← Back to courses",
-    "backToCourse": "← Back to course",
-    "backToBanks": "← Back to banks",
-    "backToHome": "🏠 Back to courses",
-    "tryAgain": "🔄 Try Again",
-    "contactSupport": "📞 Contact Support"
-  },
-  "form": {
-    "enterEmail": "📧 Please enter your email address:",
-    "enterName": "👤 Please enter your full name:",
-    "enterPosition": "💼 Please enter your work position:",
-    "retryingSave": "🔄 Retrying to save your information...",
-    "sessionIncomplete": "❌ Session data is incomplete. Please start over."
-  },
-  "validation": {
-    "email": {
-      "tooLong": "❌ Email address is too long. Please enter a valid email address:",
-      "tooShort": "❌ Email address is too short. Please enter a valid email address:",
-      "invalid": "❌ Please enter a valid email address (e.g., user@example.com):",
-      "typoSuggestion": "❌ Did you mean *{suggestion}*? Please enter the correct email address:"
+    "labels": {
+        "price": "Price",
+        "commonPrice": "Common price"
     },
-    "name": {
-      "tooShort": "❌ Please enter a valid name (at least 2 characters):",
-      "tooLong": "❌ Name is too long. Please enter a name with less than 100 characters:",
-      "invalidCharacters": "❌ Please enter a valid name using only letters, spaces, hyphens, and apostrophes:",
-      "missingFirstName": "❌ Please enter at least your first name:",
-      "invalidPartLength": "❌ Please enter a valid name (each part should be 1-50 characters):"
+    "course": {
+        "details": {
+            "title": "📖 {courseName}",
+            "description": "📝 {description}",
+            "authors": "👥 Authors: {authors}",
+            "startDate": "📅 Start Date: {date}",
+            "endDate": "📅 End Date: {date}",
+            "price": "💰 Price: {price} {currency}"
+        },
+        "notFound": "Course not found",
+        "noCoursesAvailable": "Sorry, no courses are currently available. Please check back later!",
+        "errorLoading": "Sorry, there was an error loading the courses. Please try again later.",
+        "errorLoadingDetails": "Sorry, there was an error loading the course details. Please try again."
     },
-    "position": {
-      "tooShort": "❌ Please enter a valid work position (at least 2 characters):",
-      "tooLong": "❌ Work position is too long. Please enter a position with less than 255 characters:",
-      "noLetters": "❌ Please enter a valid work position that contains letters:"
+    "buttons": {
+        "buyCourse": "💳 Buy the course",
+        "backToCourses": "← Back to courses",
+        "backToCourse": "← Back to course",
+        "backToBanks": "← Back to banks",
+        "backToHome": "🏠 Back to courses",
+        "tryAgain": "🔄 Try Again",
+        "contactSupport": "📞 Contact Support"
+    },
+    "form": {
+        "enterEmail": "📧 Please enter your email address:",
+        "enterName": "👤 Please enter your full name:",
+        "enterPosition": "💼 Please enter your work position:",
+        "retryingSave": "🔄 Retrying to save your information...",
+        "sessionIncomplete": "❌ Session data is incomplete. Please start over."
+    },
+    "validation": {
+        "email": {
+            "tooLong": "❌ Email address is too long. Please enter a valid email address:",
+            "tooShort": "❌ Email address is too short. Please enter a valid email address:",
+            "invalid": "❌ Please enter a valid email address (e.g., user@example.com):",
+            "typoSuggestion": "❌ Did you mean *{suggestion}*? Please enter the correct email address:"
+        },
+        "name": {
+            "tooShort": "❌ Please enter a valid name (at least 2 characters):",
+            "tooLong": "❌ Name is too long. Please enter a name with less than 100 characters:",
+            "invalidCharacters": "❌ Please enter a valid name using only letters, spaces, hyphens, and apostrophes:",
+            "missingFirstName": "❌ Please enter at least your first name:",
+            "invalidPartLength": "❌ Please enter a valid name (each part should be 1-50 characters):"
+        },
+        "position": {
+            "tooShort": "❌ Please enter a valid work position (at least 2 characters):",
+            "tooLong": "❌ Work position is too long. Please enter a position with less than 255 characters:",
+            "noLetters": "❌ Please enter a valid work position that contains letters:"
+        }
+    },
+    "payment": {
+        "title": "Thank you for the information! Last step remaining.",
+        "choosePaymentMethod": "Choose a convenient payment method:",
+        "privatbank": "PrivatBank",
+        "monobank": "Monobank",
+        "paymentDetails": "After payment, we will contact you within a business day for confirmation and next steps.",
+        "thankYou": "Thank you for choosing us!",
+        "bankSelection": {
+            "title": "Choose a bank for payment",
+            "description": "Select the bank that is convenient for you to get payment details:"
+        },
+        "bankDetails": {
+            "privatbank": {
+                "title": "💳 Payment via PrivatBank",
+                "instructions": "To pay via PrivatBank:\n\n1️⃣ Scan the QR code below or follow the link\n2️⃣ Make a transfer for the specified amount\n3️⃣ Save the payment receipt\n\nAfter payment, we will contact you within a business day for confirmation and next steps."
+            },
+            "monobank": {
+                "title": "💳 Payment via Monobank",
+                "instructions": "To pay via Monobank:\n\n1️⃣ Scan the QR code below or follow the link\n2️⃣ Make a transfer for the specified amount\n3️⃣ Save the payment receipt\n\nAfter payment, we will contact you within a business day for confirmation and next steps."
+            }
+        }
+    },
+    "success": {
+        "dataSaved": "✅ Your information has been saved successfully!",
+        "paymentInstructions": "💳 Follow the link to pay and save the receipt. You will need to confirm your purchase:",
+        "thankYou": "Thank you for choosing Tellers Agency Academy!"
+    },
+    "errors": {
+        "general": {
+            "somethingWrong": "❌ Something went wrong. Please try again.",
+            "startBot": "Sorry, there was an error starting the bot. Please try again.",
+            "showHelp": "Sorry, there was an error showing help. Please try again.",
+            "useStart": "Please use /start to begin or select an option from the menu."
+        },
+        "dataSaving": {
+            "failed": "❌ Sorry, there was an error saving your information to our system.\n\nDon't worry, your data is still here! You can try again.",
+            "stillTrouble": "❌ Still having trouble saving your information.\n\nThis might be a temporary issue with our system. Please try again in a few minutes."
+        },
+        "rateLimited": "⚠️ Too many requests. Please wait a moment before trying again.",
+        "expiredCallback": "⏰ This button has expired. You need to start over."
+    },
+    "help": {
+        "title": "📚 Tellers Agency Academy Help",
+        "commands": {
+            "start": "• /start - Start the bot and see course list",
+            "help": "• /help - Show this help message",
+            "lang": "• /lang - Change language"
+        },
+        "instructions": "Simply select a course to view details and purchase!"
+    },
+    "language": {
+        "selectLanguage": "🌍 Please select your language:",
+        "languageChanged": "✅ Language changed to {language}",
+        "languageSet": "Language updated!",
+        "unsupportedLanguage": "This language is not supported yet."
+    },
+    "common": {
+        "loading": "Loading...",
+        "processing": "Processing...",
+        "done": "Done!",
+        "cancel": "Cancel",
+        "continue": "Continue",
+        "yes": "Yes",
+        "no": "No"
     }
-  },
-  "payment": {
-    "title": "Thank you for the information! Last step remaining.",
-    "choosePaymentMethod": "Choose a convenient payment method:",
-    "privatbank": "PrivatBank",
-    "monobank": "Monobank",
-    "paymentDetails": "After payment, we will contact you within a business day for confirmation and next steps.",
-    "thankYou": "Thank you for choosing us!",
-    "bankSelection": {
-      "title": "Choose a bank for payment",
-      "description": "Select the bank that is convenient for you to get payment details:"
-    },
-    "bankDetails": {
-      "privatbank": {
-        "title": "💳 Payment via PrivatBank",
-        "instructions": "To pay via PrivatBank:\n\n1️⃣ Scan the QR code below or follow the link\n2️⃣ Make a transfer for the specified amount\n3️⃣ Save the payment receipt\n\nAfter payment, we will contact you within a business day for confirmation and next steps."
-      },
-      "monobank": {
-        "title": "💳 Payment via Monobank",
-        "instructions": "To pay via Monobank:\n\n1️⃣ Scan the QR code below or follow the link\n2️⃣ Make a transfer for the specified amount\n3️⃣ Save the payment receipt\n\nAfter payment, we will contact you within a business day for confirmation and next steps."
-      }
-    }
-  },
-  "success": {
-    "dataSaved": "✅ Your information has been saved successfully!",
-    "paymentInstructions": "💳 Follow the link to pay and save the receipt. You will need to confirm your purchase:",
-    "thankYou": "Thank you for choosing Tellers Agency Academy!"
-  },
-  "errors": {
-    "general": {
-      "somethingWrong": "❌ Something went wrong. Please try again.",
-      "startBot": "Sorry, there was an error starting the bot. Please try again.",
-      "showHelp": "Sorry, there was an error showing help. Please try again.",
-      "useStart": "Please use /start to begin or select an option from the menu."
-    },
-    "dataSaving": {
-      "failed": "❌ Sorry, there was an error saving your information to our system.\n\nDon't worry, your data is still here! You can try again.",
-      "stillTrouble": "❌ Still having trouble saving your information.\n\nThis might be a temporary issue with our system. Please try again in a few minutes."
-    },
-    "rateLimited": "⚠️ Too many requests. Please wait a moment before trying again.",
-    "expiredCallback": "⏰ This button has expired. You need to start over."
-  },
-  "help": {
-    "title": "📚 Tellers Agency Academy Help",
-    "commands": {
-      "start": "• /start - Start the bot and see course list",
-      "help": "• /help - Show this help message",
-      "lang": "• /lang - Change language"
-    },
-    "instructions": "Simply select a course to view details and purchase!"
-  },
-  "language": {
-    "selectLanguage": "🌍 Please select your language:",
-    "languageChanged": "✅ Language changed to {language}",
-    "languageSet": "Language updated!",
-    "unsupportedLanguage": "This language is not supported yet."
-  },
-  "common": {
-    "loading": "Loading...",
-    "processing": "Processing...",
-    "done": "Done!",
-    "cancel": "Cancel",
-    "continue": "Continue",
-    "yes": "Yes",
-    "no": "No"
-  }
 }

@@ -38,6 +38,26 @@
                     }
                 ]
             },
+            "promotion": {
+                "name": "Early bird",
+                "description": "Сьогодні квиток можна придбати за 1 620 грн — це спеціальна Early bird ціна зі знижкою 40%, яка діятиме до 08 вересня!",
+                "price": 1620,
+                "end_date": "2025-09-08",
+                "payment": {
+                    "privatbank": {
+                        "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMTYyMC4wCjM1MzQxMDE4MDEKCgpFYXJseSBiaXJkIHRpY2tldCCz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",
+                        "qr_code": "./images/privat_early_bird_intensiv_qr.jpeg"
+                    },
+                    "monobank": {
+                        "requisites": {
+                            "iban": "UA803220010000026001320034404",
+                            "tax_id": "3534101801",
+                            "recipient": "ФОП Леонова Марія Олегівна",
+                            "description": "Інформаційні послуги The Tellers Academy"
+                        }
+                    }
+                }
+            },
             "price": 2700,
             "currency_symbol": "₴",
             "start_date": "2025-09-16",
@@ -87,6 +107,26 @@
                         "description": "У цій розмові буде максимум практики, адже Катерина розповідатиме про власний досвід ділових перемовин з клієнтами та як побудувати комунікацію так, аби знайомство за кавою перетворити на річний контракт і міцну дружбу."
                     }
                 ]
+            },
+            "promotion": {
+                "name": "Early bird",
+                "description": "Сьогодні квиток можна придбати за 2 100 грн — це спеціальна Early bird ціна зі знижкою 40%, яка діятиме до 08 вересня!",
+                "price": 2100,
+                "end_date": "2025-09-08",
+                "payment": {
+                    "privatbank": {
+                        "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMjEwMC4wCjM1MzQxMDE4MDEKCgpFYXJseSBiaXJkIHRpY2tldCCz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",
+                        "qr_code": "./images/privat_early_bird_master-class_qr.jpeg"
+                    },
+                    "monobank": {
+                        "requisites": {
+                            "iban": "UA803220010000026001320034404",
+                            "tax_id": "3534101801",
+                            "recipient": "ФОП Леонова Марія Олегівна",
+                            "description": "Інформаційні послуги The Tellers Academy"
+                        }
+                    }
+                }
             },
             "price": 3500,
             "currency_symbol": "₴",

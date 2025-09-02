@@ -17,6 +17,29 @@ export interface Lecture {
     description: string;
 }
 
+export interface Payment {
+    privatbank: {
+        link: string;
+        qr_code: string;
+    };
+    monobank: {
+        requisites: {
+            iban: string;
+            tax_id: string;
+            recipient: string;
+            description: string;
+        };
+    };
+}
+
+export interface Promotion {
+    name: string;
+    description: string;
+    price: number;
+    end_date: string;
+    payment: Payment;
+}
+
 export interface Course {
     id: number;
     name: string;
@@ -26,6 +49,7 @@ export interface Course {
         description: string;
         lectures: Lecture[];
     };
+    promotion?: Promotion;
     price: number;
     currency_symbol: string;
     start_date: string;

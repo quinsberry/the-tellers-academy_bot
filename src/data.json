@@ -42,7 +42,7 @@
                 "name": "Early bird",
                 "description": "Сьогодні квиток можна придбати за 1 620 грн — це спеціальна Early bird ціна зі знижкою 40%, яка діятиме до 08 вересня!",
                 "price": 1620,
-                "end_date": "2025-09-08",
+                "end_date": "2025-09-09",
                 "payment": {
                     "privatbank": {
                         "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMTYyMC4wCjM1MzQxMDE4MDEKCgpFYXJseSBiaXJkIHRpY2tldCCz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",
@@ -112,7 +112,7 @@
                 "name": "Early bird",
                 "description": "Сьогодні квиток можна придбати за 2 100 грн — це спеціальна Early bird ціна зі знижкою 40%, яка діятиме до 08 вересня!",
                 "price": 2100,
-                "end_date": "2025-09-08",
+                "end_date": "2025-09-09",
                 "payment": {
                     "privatbank": {
                         "link": "https://bank.gov.ua/qr/QkNECjAwMgoyClVDVAoK1M7PIMvl7u3u4uAgzODws_8gzuvl47Pi7eAKVUEwNzMwNTI5OTAwMDAwMjYwMDEwMDYyNTEwMTUKVUFIMjEwMC4wCjM1MzQxMDE4MDEKCgpFYXJseSBiaXJkIHRpY2tldCCz7fTu8Ozg9rPp7bMg7-7x6_Pj6CBUaGUgVGVsbGVycyBBY2FkZW15Cg==",

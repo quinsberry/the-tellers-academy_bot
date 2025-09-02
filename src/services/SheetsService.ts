@@ -106,11 +106,8 @@ export class SheetsService {
 
             logger.info(
                 maskSensitiveData({
-                    username: userData.telegramUsername,
-                    email: userData.email,
-                    name: userData.name,
+                    username: `@${userData.telegramUsername}`,
                     courseId: userData.courseId,
-                    courseName: userData.courseName,
                 }),
                 'Saving user data',
             );
@@ -132,11 +129,10 @@ export class SheetsService {
 
             logger.info(
                 maskSensitiveData({
-                    username: userData.telegramUsername,
-                    email: userData.email,
-                    name: userData.name,
+                    username: `@${userData.telegramUsername}`,
+                    courseId: userData.courseId,
                 }),
-                `User (@${userData.telegramUsername}) data saved successfully`,
+                `User data saved successfully`,
             );
         } catch (error) {
             logger.error(error as Error, `Error saving user (@${userData.telegramUsername}) data to Google Sheets`);

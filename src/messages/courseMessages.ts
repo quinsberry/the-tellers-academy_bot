@@ -3,6 +3,7 @@ import { formatCourseDate } from '@/utils/formatDates';
 import { localizationService } from '@/services/LocalizationService';
 import { a, b, code, fmt, FormattedString } from '@grammyjs/parse-mode';
 import { config } from '@/config';
+import { isValidPromotion } from '@/utils/promotion';
 
 export const BUY_COURSE_KEY = 'buy_course';
 export const BACK_TO_COURSES_KEY = 'back_to_courses';
@@ -45,7 +46,7 @@ export function generateCourseDetails(course: Course): FormattedString {
     };
 
     const priceSection =
-        course.promotion && new Date(course.promotion.end_date) > new Date()
+        course.promotion && isValidPromotion(course.promotion)
             ? FormattedString.join([
                   fmt`${b}${course.promotion.description}${b}\n`,
                   fmt`${localizationService.t('labels.commonPrice')}: ${course.price}${course.currency_symbol}\n\n`,
@@ -114,8 +115,7 @@ export function generateBankSelectionKeyboard(courseId: number) {
 export function generateBankPaymentMessage(bank: 'privatbank' | 'monobank', course: Course): FormattedString {
     let paymentDetails: FormattedString;
 
-    const validPromotion =
-        course.promotion && new Date(course.promotion.end_date) > new Date() ? course.promotion : null;
+    const validPromotion = course.promotion && isValidPromotion(course.promotion) ? course.promotion : null;
     const payment = validPromotion?.payment ?? course.payment;
 
     if (bank === 'privatbank') {

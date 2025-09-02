@@ -19,6 +19,7 @@ import {
     generateFinalKeyboard,
 } from '../messages/courseMessages';
 import { localizationService } from '@/services/LocalizationService';
+import { isValidPromotion } from '@/utils/promotion';
 
 /**
  * Show welcome message and course list
@@ -189,7 +190,7 @@ export async function handlePrivatBankSelection(ctx: BotContext): Promise<void> 
         const keyboard = generateFinalKeyboard();
 
         // Get QR code path from course data
-        const validPromotion = course.promotion && new Date(course.promotion.end_date) > new Date() ? course.promotion : null;
+        const validPromotion = course.promotion && isValidPromotion(course.promotion) ? course.promotion : null;
         const qrCodePath = validPromotion?.payment?.privatbank?.qr_code ?? course.payment?.privatbank?.qr_code;
 
         if (qrCodePath && qrCodePath.startsWith('./images/')) {
